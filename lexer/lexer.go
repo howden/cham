@@ -94,6 +94,11 @@ func (lexer *Lexer) NextToken() (token.Token, error) {
 	}
 }
 
+// Returns the current position of the scanner
+func (lexer *Lexer) Pos() scanner.Position {
+	return lexer.scanner.Pos()
+}
+
 // Consumes the remaining tokens from the lexer until EOF is reached, and returns them in a slice
 func (lexer *Lexer) RemainingTokens() ([]token.Token, error) {
 	var arr []token.Token

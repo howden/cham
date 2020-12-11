@@ -77,5 +77,5 @@ func (t Token) String() string {
 	if t.Literal != nil {
 		return fmt.Sprintf("%s(%s)", t.Type, *t.Literal)
 	}
-	return fmt.Sprintf("%s", t.Type)
+	return t.Type.String()
 }
