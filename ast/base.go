@@ -3,7 +3,7 @@ package ast
 // Interface to represent the program state.
 // (stores the values of variables in a given reaction)
 type State interface {
-	GetVar(ident *Identifier) int
+	GetVar(ident Identifier) int
 }
 
 // Interface representing an integer term - just something that returns an int
@@ -24,8 +24,8 @@ type BooleanTerm interface {
 }
 
 // Creates an identifier
-func Ident(s string) *Identifier {
-	return &Identifier{s}
+func Ident(s string) Identifier {
+	return Identifier{s}
 }
 
 // Creates a number
@@ -39,20 +39,20 @@ type Identifier struct {
 	name string
 }
 
-func (ident *Identifier) Eval(state State) int {
+func (ident Identifier) Eval(state State) int {
 	return state.GetVar(ident)
 }
 
-func (ident *Identifier) String() string {
+func (ident Identifier) String() string {
 	return ident.name
 }
 
 // Struct representing a number
 // These are used in the action/condition
 type number struct {
-	Int int
+	int int
 }
 
 func (number number) Eval(_ State) int {
-	return number.Int
+	return number.int
 }

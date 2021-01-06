@@ -6,12 +6,12 @@ type SimpleState struct {
 	m map[ast.Identifier]int
 }
 
-func (s *SimpleState) GetVar(ident *ast.Identifier) int {
-	return s.m[*ident]
+func (s *SimpleState) GetVar(ident ast.Identifier) int {
+	return s.m[ident]
 }
 
-func (s *SimpleState) PutVar(ident *ast.Identifier, v int) {
-	s.m[*ident] = v
+func (s *SimpleState) PutVar(ident ast.Identifier, v int) {
+	s.m[ident] = v
 }
 
 func NewState() *SimpleState {

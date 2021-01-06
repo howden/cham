@@ -47,50 +47,50 @@ var simpleTokens = map[rune]token.TokenType{
 }
 
 // Produces the next token from the lexer
-func (lexer *Lexer) NextToken() (token.Token, error) {
+func (lexer *Lexer) NextToken() token.Token {
 	s := lexer.scanner
 	tok := s.Scan()
 
 	if tok == scanner.EOF {
-		return token.EOF.New(), nil
+		return token.EOF.New()
 	} else if tok == scanner.Ident {
 		if lexer.scanner.TokenText() == "if" {
-			return token.If.New(), nil
+			return token.If.New()
 		}
-		return token.Ident.WithLiteral(s.TokenText()), nil
+		return token.Ident.WithLiteral(s.TokenText())
 	} else if tok == scanner.Int {
-		return token.Number.WithLiteral(s.TokenText()), nil
+		return token.Number.WithLiteral(s.TokenText())
 	} else if tok == '=' && s.Peek() == '>' {
 		s.Scan()
-		return token.ReactionOp.New(), nil
+		return token.ReactionOp.New()
 	} else if tok == '<' {
 		if s.Peek() == '=' {
 			s.Scan()
-			return token.LessThanOrEqual.New(), nil
+			return token.LessThanOrEqual.New()
 		}
-		return token.LessThan.New(), nil
+		return token.LessThan.New()
 	} else if tok == '>' {
 		if s.Peek() == '=' {
 			s.Scan()
-			return token.GreaterThanOrEqual.New(), nil
+			return token.GreaterThanOrEqual.New()
 		}
-		return token.GreaterThan.New(), nil
+		return token.GreaterThan.New()
 	} else if tok == '=' && s.Peek() == '=' {
 		s.Scan()
-		return token.Equal.New(), nil
+		return token.Equal.New()
 	} else if tok == '!' && s.Peek() == '=' {
 		s.Scan()
-		return token.NotEqual.New(), nil
+		return token.NotEqual.New()
 	} else if tok == '|' && s.Peek() == '|' {
 		s.Scan()
-		return token.Or.New(), nil
+		return token.Or.New()
 	} else if tok == '&' && s.Peek() == '&' {
 		s.Scan()
-		return token.And.New(), nil
+		return token.And.New()
 	} else if desc, found := simpleTokens[tok]; found {
-		return desc.New(), nil
+		return desc.New()
 	} else {
-		return token.Token{}, fmt.Errorf("unknown token '%s' at %s", s.TokenText(), s.Pos())
+		return token.Error(fmt.Errorf("unknown token '%s' at %s", s.TokenText(), s.Pos()))
 	}
 }
 
@@ -102,9 +102,9 @@ func (lexer *Lexer) Pos() scanner.Position {
 // Consumes the remaining tokens from the lexer until EOF is reached, and returns them in a slice
 func (lexer *Lexer) RemainingTokens() ([]token.Token, error) {
 	var arr []token.Token
-	for tok, err := lexer.NextToken(); err != nil || tok.Type != token.EOF; tok, err = lexer.NextToken() {
-		if err != nil {
-			return nil, err
+	for tok := lexer.NextToken(); tok.Type != token.EOF; tok = lexer.NextToken() {
+		if tok.Type == token.Invalid {
+			return nil, tok.Err
 		}
 		arr = append(arr, tok)
 	}

@@ -2,9 +2,9 @@ package ast
 
 // AST encapsulating a single reaction
 type Reaction struct {
-	Input     ReactionInput
-	Action    ReactionAction
-	Condition ReactionCondition
+	Input     *ReactionInput
+	Action    *ReactionAction
+	Condition *ReactionCondition
 }
 
 // Represents the reaction input

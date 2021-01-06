@@ -6,6 +6,7 @@ type TokenType int
 
 const (
 	EOF TokenType = iota
+	Invalid
 	Ident
 	Number
 	ReactionOp         // =>
@@ -35,11 +36,16 @@ func (t TokenType) New() Token {
 }
 
 func (t TokenType) WithLiteral(literal string) Token {
-	return Token{Type: t, Literal: &literal}
+	return Token{Type: t, Literal: literal, hasLiteral: true}
+}
+
+func Error(err error) Token {
+	return Token{Type: Invalid, Err: err}
 }
 
 var names = map[TokenType]string{
 	EOF:                "EOF",
+	Invalid:            "Invalid",
 	Ident:              "ident",
 	Number:             "number",
 	ReactionOp:         "reactionOp",
@@ -69,13 +75,18 @@ func (t TokenType) String() string {
 }
 
 type Token struct {
-	Type    TokenType
-	Literal *string
+	Type       TokenType
+	Literal    string
+	hasLiteral bool
+	Err        error
 }
 
 func (t Token) String() string {
-	if t.Literal != nil {
-		return fmt.Sprintf("%s(%s)", t.Type, *t.Literal)
+	if t.Type == Invalid && t.Err != nil {
+		return fmt.Sprintf("invalid(%s)", t.Err)
+	}
+	if t.hasLiteral {
+		return fmt.Sprintf("%s(%s)", t.Type, t.Literal)
 	}
 	return t.Type.String()
 }
