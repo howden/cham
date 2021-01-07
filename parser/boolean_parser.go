@@ -6,17 +6,6 @@ import (
 	"github.com/howden/cham/token"
 )
 
-type booleanExpressionParser struct {
-	parser       *Parser
-	currentToken token.Token
-	root         ast.BooleanTerm
-}
-
-func (parser *Parser) parseBexp() (ast.BooleanTerm, error) {
-	boolParser := booleanExpressionParser{parser: parser}
-	return boolParser.parse()
-}
-
 // <bexp> ::= <bterm> {<or> <bterm>}
 // <bterm> ::= <bnotfactor> {<and> <bnotfactor>}
 // <bnotfactor> ::= <not> <bfactor>
@@ -24,91 +13,74 @@ func (parser *Parser) parseBexp() (ast.BooleanTerm, error) {
 // <bfactor> ::= <bool-value>
 // <bfactor> ::= <openb> <bexp> <closeb>
 
-func (parser *booleanExpressionParser) parse() (ast.BooleanTerm, error) {
-	err := parser.exp()
+func (parser *Parser) parseBexp() (ast.BooleanTerm, error) {
+	root, err := parser.bterm()
 	if err != nil {
 		return nil, err
 	}
-	return parser.root, nil
-}
-
-func (parser *booleanExpressionParser) exp() error {
-	err := parser.term()
-	if err != nil {
-		return err
-	}
 
 	for parser.currentToken.Type == token.Or {
-		left := parser.root
-		err = parser.term()
+		left := root
+		right, err := parser.bterm()
 		if err != nil {
-			return err
+			return nil, err
 		}
-		right := parser.root
-		parser.root = ast.BooleanOr(left, right)
+		root = ast.BooleanOr(left, right)
 	}
 
-	return nil
+	return root, nil
 }
 
-func (parser *booleanExpressionParser) term() error {
-	err := parser.factor()
+func (parser *Parser) bterm() (ast.BooleanTerm, error) {
+	root, err := parser.notFactor()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for parser.currentToken.Type == token.And {
-		left := parser.root
-		err = parser.factor()
+		left := root
+		right, err := parser.notFactor()
 		if err != nil {
-			return err
+			return nil, err
 		}
-		right := parser.root
-		parser.root = ast.BooleanAnd(left, right)
+		root = ast.BooleanAnd(left, right)
 	}
 
-	return nil
+	return root, nil
 }
 
-func (parser *booleanExpressionParser) notFactor() error {
-	parser.currentToken = parser.parser.currentToken
-
+func (parser *Parser) notFactor() (ast.BooleanTerm, error) {
 	if parser.currentToken.Type != token.Not {
-		return parser.factor()
+		return parser.bfactor()
 	}
 
-	parser.parser.advance()
+	parser.advance()
 
-	err := parser.factor()
+	fac, err := parser.bfactor()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	parser.root = ast.BooleanNot(parser.root)
-	return nil
+	return ast.BooleanNot(fac), nil
 }
 
-func (parser *booleanExpressionParser) factor() error {
-	parser.currentToken = parser.parser.currentToken
-
+func (parser *Parser) bfactor() (ast.BooleanTerm, error) {
 	if parser.currentToken.Type == token.OpenBracket {
-		parser.parser.advance()
-		err := parser.exp()
+		parser.advance()
+		exp, err := parser.parseBexp()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if parser.currentToken.Type != token.CloseBracket {
-			return fmt.Errorf("expected close bracket but got %v instead", parser.currentToken)
+			return nil, fmt.Errorf("expected close bracket but got %v instead", parser.currentToken)
 		}
+		return exp, nil
 	} else {
-		comp, err := parser.parser.parseComparison()
+		comp, err := parser.parseComparison()
 		if err != nil {
-			return err
+			return nil, err
 		}
-		parser.root = comp
-		parser.currentToken = parser.parser.currentToken
-		parser.parser.advance()
-	}
 
-	return nil
+		return comp, nil
+	}
 }
