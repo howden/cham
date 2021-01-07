@@ -25,6 +25,7 @@ func (parser *Parser) parseComparison() (ast.BooleanTerm, error) {
 	if !ok {
 		return nil, fmt.Errorf("expected comparison operator but got %v", parser.currentToken)
 	}
+	parser.next()
 
 	right, err := parser.parseAexp()
 	if err != nil {

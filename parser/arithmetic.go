@@ -28,13 +28,16 @@ func (parser *Parser) parseAexp() (ast.IntegerTerm, error) {
 	}
 
 	for isAddOp(parser.currentToken.Type) {
+		opType := parser.currentToken.Type
+		parser.next()
+
 		left := root
 		right, err := parser.parseAexp()
 		if err != nil {
 			return nil, err
 		}
 
-		if parser.currentToken.Type == token.Plus {
+		if opType == token.Plus {
 			root = ast.Plus(left, right)
 		} else {
 			root = ast.Subtract(left, right)
@@ -51,13 +54,16 @@ func (parser *Parser) aterm() (ast.IntegerTerm, error) {
 	}
 
 	for isMultOp(parser.currentToken.Type) {
+		opType := parser.currentToken.Type
+		parser.next()
+
 		left := root
 		right, err := parser.aterm()
 		if err != nil {
 			return nil, err
 		}
 
-		if parser.currentToken.Type == token.Multiply {
+		if opType == token.Multiply {
 			root = ast.Multiply(left, right)
 		} else {
 			root = ast.Divide(left, right)
@@ -69,7 +75,7 @@ func (parser *Parser) aterm() (ast.IntegerTerm, error) {
 
 func (parser *Parser) afactor() (ast.IntegerTerm, error) {
 	if parser.currentToken.Type == token.OpenBracket {
-		parser.advance()
+		parser.next()
 		exp, err := parser.parseAexp()
 		if err != nil {
 			return nil, err
@@ -77,6 +83,7 @@ func (parser *Parser) afactor() (ast.IntegerTerm, error) {
 		if parser.currentToken.Type != token.CloseBracket {
 			return nil, fmt.Errorf("expected close bracket but got %v instead", parser.currentToken)
 		}
+		parser.next()
 		return exp, nil
 	} else {
 		variable, err := parser.parseVariable()

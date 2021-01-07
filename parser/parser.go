@@ -9,19 +9,13 @@ import (
 )
 
 type Parser struct {
-	lexer *lexer.Lexer
-
+	lexer        *lexer.Lexer
 	currentToken token.Token
-	peekToken    token.Token
 }
 
 func NewParser(lexer *lexer.Lexer) *Parser {
 	p := &Parser{lexer: lexer}
-
-	// advance twice to fill both current and peek variables
-	p.advance()
-	p.advance()
-
+	p.next()
 	return p
 }
 
@@ -39,9 +33,8 @@ func (parser *Parser) ParseProgram() (*ast.Reaction, error) {
 	return reaction, nil
 }
 
-func (parser *Parser) advance() {
-	parser.currentToken = parser.peekToken
-	parser.peekToken = parser.lexer.NextToken()
+func (parser *Parser) next() {
+	parser.currentToken = parser.lexer.NextToken()
 }
 
 func expect(token token.Token, expected token.TokenType) (bool, error) {
@@ -62,12 +55,12 @@ func (parser *Parser) parseVariable() (ast.IntegerTerm, error) {
 			return nil, fmt.Errorf("parser error for int: %v, %w", parser.currentToken.Literal, err)
 		}
 
-		parser.advance()
+		parser.next()
 		return ast.Number(i), nil
 	}
 
 	if ok, _ := parser.expectToken(token.Ident); ok {
-		parser.advance()
+		parser.next()
 		return ast.Ident(parser.currentToken.Literal), nil
 	}
 
@@ -85,7 +78,7 @@ func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 	if ok, err := parser.expectToken(token.ReactionOp); !ok {
 		return nil, err
 	}
-	parser.advance()
+	parser.next()
 
 	action, err := parser.parseReactionAction()
 	if err != nil {
@@ -96,7 +89,7 @@ func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 	if ok, err := parser.expectToken(token.If); !ok {
 		return nil, err
 	}
-	parser.advance()
+	parser.next()
 
 	condition, err := parser.parseBexp()
 	if err != nil {
@@ -119,7 +112,7 @@ func (parser *Parser) parseReactionInput() (*ast.ReactionInput, error) {
 		if first {
 			first = false
 		} else {
-			parser.advance()
+			parser.next()
 		}
 
 		// if first=true, or if there was a comma before, require that the next
@@ -130,7 +123,7 @@ func (parser *Parser) parseReactionInput() (*ast.ReactionInput, error) {
 
 		// append the identifier to the slice and advance the parser
 		identifiers = append(identifiers, ast.Ident(parser.currentToken.Literal))
-		parser.advance()
+		parser.next()
 	}
 
 	return &ast.ReactionInput{Idents: identifiers}, nil
@@ -139,12 +132,12 @@ func (parser *Parser) parseReactionInput() (*ast.ReactionInput, error) {
 func (parser *Parser) parseReactionAction() (*ast.ReactionAction, error) {
 	openCurly, _ := parser.expectToken(token.OpenCurlyBracket)
 	if openCurly {
-		parser.advance()
+		parser.next()
 	}
 
 	// if immediately closed, return an empty products slice
 	if closeCurly, _ := parser.expectToken(token.CloseCurlyBracket); closeCurly {
-		parser.advance()
+		parser.next()
 		return &ast.ReactionAction{Products: []ast.IntegerTerm{}}, nil
 	}
 
@@ -157,7 +150,7 @@ func (parser *Parser) parseReactionAction() (*ast.ReactionAction, error) {
 		if first {
 			first = false
 		} else {
-			parser.advance()
+			parser.next()
 		}
 
 		// if first=true, or if there was a comma before, require that the next

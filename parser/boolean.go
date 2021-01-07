@@ -20,6 +20,7 @@ func (parser *Parser) parseBexp() (ast.BooleanTerm, error) {
 	}
 
 	for parser.currentToken.Type == token.Or {
+		parser.next()
 		left := root
 		right, err := parser.bterm()
 		if err != nil {
@@ -38,6 +39,7 @@ func (parser *Parser) bterm() (ast.BooleanTerm, error) {
 	}
 
 	for parser.currentToken.Type == token.And {
+		parser.next()
 		left := root
 		right, err := parser.notFactor()
 		if err != nil {
@@ -54,7 +56,7 @@ func (parser *Parser) notFactor() (ast.BooleanTerm, error) {
 		return parser.bfactor()
 	}
 
-	parser.advance()
+	parser.next()
 
 	fac, err := parser.bfactor()
 	if err != nil {
@@ -66,7 +68,7 @@ func (parser *Parser) notFactor() (ast.BooleanTerm, error) {
 
 func (parser *Parser) bfactor() (ast.BooleanTerm, error) {
 	if parser.currentToken.Type == token.OpenBracket {
-		parser.advance()
+		parser.next()
 		exp, err := parser.parseBexp()
 		if err != nil {
 			return nil, err
@@ -74,6 +76,7 @@ func (parser *Parser) bfactor() (ast.BooleanTerm, error) {
 		if parser.currentToken.Type != token.CloseBracket {
 			return nil, fmt.Errorf("expected close bracket but got %v instead", parser.currentToken)
 		}
+		parser.next()
 		return exp, nil
 	} else {
 		comp, err := parser.parseComparison()
