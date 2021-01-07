@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 // The OR boolean expression - ||
 func BooleanOr(left BooleanTerm, right BooleanTerm) BooleanTerm {
 	return &booleanOr{left, right}
@@ -33,10 +37,22 @@ func (b booleanOr) Eval(state State) bool {
 	return b.left.Eval(state) || b.right.Eval(state)
 }
 
+func (b booleanOr) String() string {
+	return fmt.Sprintf("boolOr{%v, %v}", b.left, b.right)
+}
+
 func (b booleanAnd) Eval(state State) bool {
 	return b.left.Eval(state) && b.right.Eval(state)
 }
 
+func (b booleanAnd) String() string {
+	return fmt.Sprintf("boolAnd{%v, %v}", b.left, b.right)
+}
+
 func (b booleanNot) Eval(state State) bool {
 	return !b.exp.Eval(state)
+}
+
+func (b booleanNot) String() string {
+	return fmt.Sprintf("boolNot{%v}", b.exp)
 }

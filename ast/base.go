@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 // Interface to represent the program state.
 // (stores the values of variables in a given reaction)
 type State interface {
@@ -25,7 +29,7 @@ type BooleanTerm interface {
 
 // Creates an identifier
 func Ident(s string) Identifier {
-	return Identifier{s}
+	return Identifier{name: s}
 }
 
 // Creates a number
@@ -44,7 +48,7 @@ func (ident Identifier) Eval(state State) int {
 }
 
 func (ident Identifier) String() string {
-	return ident.name
+	return fmt.Sprintf("ident(%s)", ident.name)
 }
 
 // Struct representing a number
@@ -55,4 +59,8 @@ type number struct {
 
 func (number number) Eval(_ State) int {
 	return number.int
+}
+
+func (number number) String() string {
+	return fmt.Sprintf("number(%v)", number.int)
 }

@@ -6,6 +6,13 @@ import (
 	"github.com/howden/cham/token"
 )
 
+// comparison.go contains the parsing code for comparisons.
+//
+// Context-free grammar accepted by this parser:
+//   <comp-op> ::= '<' | '>' | '<=' | '>=' | '==' | '!='
+//   <comparison> ::= <aexp> <comp-op> <aexp>
+
+// Map of comparison tokens -> a function that creates an AST
 var comparisonAsts = map[token.TokenType]func(left ast.IntegerTerm, right ast.IntegerTerm) ast.BooleanTerm{
 	token.Equal:              ast.Equals,
 	token.NotEqual:           ast.NotEquals,
@@ -15,6 +22,7 @@ var comparisonAsts = map[token.TokenType]func(left ast.IntegerTerm, right ast.In
 	token.GreaterThanOrEqual: ast.GreaterThanEqual,
 }
 
+// Parses a comparison
 func (parser *Parser) parseComparison() (ast.BooleanTerm, error) {
 	left, err := parser.parseAexp()
 	if err != nil {

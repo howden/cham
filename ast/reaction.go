@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 // AST encapsulating a single reaction
 type Reaction struct {
 	Input     *ReactionInput
@@ -24,4 +28,19 @@ type ReactionAction struct {
 // be expanded infinitely with and/or rules)
 type ReactionCondition struct {
 	Expression BooleanTerm
+}
+
+func (reaction Reaction) String() string {
+	f := `reaction{
+  input{
+    %v
+  },
+  action{
+    %v
+  },
+  condition{
+    %v
+  },
+}`
+	return fmt.Sprintf(f, reaction.Input.Idents, reaction.Action.Products, reaction.Condition.Expression)
 }
