@@ -34,6 +34,7 @@ func FromReader(input io.Reader, fileName string) *Lexer {
 
 // "Simple" tokens with a direct, non-ambiguous mapping from single character to token
 var simpleTokens = map[rune]token.TokenType{
+	'|': token.ReactionChain,
 	'!': token.Not,
 	'(': token.OpenBracket,
 	')': token.CloseBracket,

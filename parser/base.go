@@ -9,21 +9,47 @@ import (
 
 // Parses a variable - either a number or an identifier
 func (parser *Parser) parseVariable() (ast.IntegerTerm, error) {
-	if ok, _ := parser.expectToken(token.Number); ok {
-		i, err := strconv.Atoi(parser.currentToken.Literal)
+	if parser.currentToken.Type == token.Number {
+		i, err := parser.parseNumber()
 		if err != nil {
-			return nil, fmt.Errorf("parser error for int: %v, %w", parser.currentToken.Literal, err)
+			return nil, err
 		}
-
-		parser.next()
 		return ast.Number(i), nil
 	}
 
-	if ok, _ := parser.expectToken(token.Ident); ok {
-		ident := ast.Ident(parser.currentToken.Literal)
-		parser.next()
-		return ident, nil
+	if parser.currentToken.Type == token.Ident {
+		ident, err := parser.parseIdent()
+		if err != nil {
+			return nil, err
+		}
+		return ast.Ident(ident), nil
 	}
 
 	return nil, fmt.Errorf("expected number or ident but got %v instead", parser.currentToken)
+}
+
+func (parser *Parser) parseNumber() (int, error) {
+	ok, err := parser.expectToken(token.Number)
+	if !ok {
+		return 0, err
+	}
+
+	i, err := strconv.Atoi(parser.currentToken.Literal)
+	if err != nil {
+		return 0, fmt.Errorf("parser error for int: %v, %w", parser.currentToken.Literal, err)
+	}
+
+	parser.next()
+	return i, nil
+}
+
+func (parser *Parser) parseIdent() (string, error) {
+	ok, err := parser.expectToken(token.Ident)
+	if !ok {
+		return "", err
+	}
+
+	ident := parser.currentToken.Literal
+	parser.next()
+	return ident, nil
 }

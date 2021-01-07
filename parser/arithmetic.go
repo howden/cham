@@ -34,7 +34,11 @@ func (parser *Parser) parseAexp() (ast.IntegerTerm, error) {
 		return nil, err
 	}
 
-	for operation, ok := addOps[parser.currentToken.Type]; ok; {
+	for {
+		operation, ok := addOps[parser.currentToken.Type]
+		if !ok {
+			break
+		}
 		parser.next()
 
 		// use root as the left value, parse right from the next token
@@ -59,7 +63,11 @@ func (parser *Parser) aterm() (ast.IntegerTerm, error) {
 		return nil, err
 	}
 
-	for operation, ok := multOps[parser.currentToken.Type]; ok; {
+	for {
+		operation, ok := multOps[parser.currentToken.Type]
+		if !ok {
+			break
+		}
 		parser.next()
 
 		// use root as the left value, parse right from the next token

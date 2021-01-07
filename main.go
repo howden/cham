@@ -35,9 +35,15 @@ func textLexer(src string) {
 
 func testParser(src string) {
 	fmt.Println("Parser Output:")
-	ast, err := parser.NewParser(lexer.FromString(src)).ParseProgram()
+	ast, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
 	if err != nil {
-		fmt.Println(err)
+		if pe, ok := err.(*parser.ParserError); ok {
+			fmt.Println(err)
+			fmt.Printf("\n%s\n", src)
+			fmt.Printf("%s^ HERE\n", strings.Repeat(" ", pe.LexerCurrentColumn-2))
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Println(ast)
 	}

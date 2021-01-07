@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/token"
+	"github.com/pkg/errors"
 )
 
 type Parser struct {
@@ -36,4 +37,39 @@ func expect(token token.Token, expected token.TokenType) (ok bool, err error) {
 // Tests whether the current token matches the expected token type
 func (parser *Parser) expectToken(expected token.TokenType) (ok bool, err error) {
 	return expect(parser.currentToken, expected)
+}
+
+// Custom error wrapper which additionally contains information
+// about the state of the lexer when the error occurred.
+// (where in the src code caused the parsing error!)
+type ParserError struct {
+	cause              error
+	LexerCurrentLine   int
+	LexerCurrentColumn int
+}
+
+func (err *ParserError) Error() string {
+	return fmt.Sprintf("error while parsing (at %d:%d): %v", err.LexerCurrentLine, err.LexerCurrentColumn, err.cause)
+}
+
+func (err *ParserError) Cause() error {
+	return err.cause
+}
+
+func (err *ParserError) Unwrap() error {
+	return err.cause
+}
+
+// function to create an error wrapper given the parser
+func (parser *Parser) wrapError(err error) *ParserError {
+	err = errors.WithStack(err)
+	line, col := 0, 0
+
+	pos := parser.lexer.Pos()
+	if pos.IsValid() {
+		line = pos.Line
+		col = pos.Column
+	}
+
+	return &ParserError{cause: err, LexerCurrentLine: line, LexerCurrentColumn: col}
 }
