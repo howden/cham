@@ -5,6 +5,7 @@ import (
 	"github.com/howden/cham/ast"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/token"
+	"strconv"
 )
 
 type Parser struct {
@@ -52,6 +53,25 @@ func expect(token token.Token, expected token.TokenType) (bool, error) {
 
 func (parser *Parser) expectToken(expected token.TokenType) (bool, error) {
 	return expect(parser.currentToken, expected)
+}
+
+func (parser *Parser) parseVariable() (ast.IntegerTerm, error) {
+	if ok, _ := parser.expectToken(token.Number); ok {
+		i, err := strconv.Atoi(parser.currentToken.Literal)
+		if err != nil {
+			return nil, fmt.Errorf("parser error for int: %v, %w", parser.currentToken.Literal, err)
+		}
+
+		parser.advance()
+		return ast.Number(i), nil
+	}
+
+	if ok, _ := parser.expectToken(token.Ident); ok {
+		parser.advance()
+		return ast.Ident(parser.currentToken.Literal), nil
+	}
+
+	return nil, fmt.Errorf("expected number or ident but got %v instead", parser.currentToken)
 }
 
 func (parser *Parser) parseReaction() (*ast.Reaction, error) {
