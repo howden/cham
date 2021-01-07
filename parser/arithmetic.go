@@ -14,14 +14,16 @@ import (
 //   <afactor> ::= <variable>
 //   <afactor> ::= <openb> <aexp> <closeb>
 
-// Gets whether a token is an "addop"
-func isAddOp(typ token.TokenType) bool {
-	return typ == token.Plus || typ == token.Subtract
+// Map of "addop" tokens -> a function that creates an AST
+var addOps = map[token.TokenType]func(left ast.IntegerTerm, right ast.IntegerTerm) ast.ArithmeticExp{
+	token.Plus:     ast.Plus,
+	token.Subtract: ast.Subtract,
 }
 
-// Gets whether a token is an "multop"
-func isMultOp(typ token.TokenType) bool {
-	return typ == token.Multiply || typ == token.Divide
+// Map of "multop" tokens -> a function that creates an AST
+var multOps = map[token.TokenType]func(left ast.IntegerTerm, right ast.IntegerTerm) ast.ArithmeticExp{
+	token.Multiply: ast.Multiply,
+	token.Divide:   ast.Divide,
 }
 
 // Parses an "aexp"
@@ -32,9 +34,7 @@ func (parser *Parser) parseAexp() (ast.IntegerTerm, error) {
 		return nil, err
 	}
 
-	for isAddOp(parser.currentToken.Type) {
-		// record the operator type, then advance the parser
-		opType := parser.currentToken.Type
+	for operation, ok := addOps[parser.currentToken.Type]; ok; {
 		parser.next()
 
 		// use root as the left value, parse right from the next token
@@ -45,12 +45,7 @@ func (parser *Parser) parseAexp() (ast.IntegerTerm, error) {
 			return nil, err
 		}
 
-		// set root to the result
-		if opType == token.Plus {
-			root = ast.Plus(left, right)
-		} else {
-			root = ast.Subtract(left, right)
-		}
+		root = operation(left, right)
 	}
 
 	return root, nil
@@ -64,9 +59,7 @@ func (parser *Parser) aterm() (ast.IntegerTerm, error) {
 		return nil, err
 	}
 
-	for isMultOp(parser.currentToken.Type) {
-		// record the operator type, then advance the parser
-		opType := parser.currentToken.Type
+	for operation, ok := multOps[parser.currentToken.Type]; ok; {
 		parser.next()
 
 		// use root as the left value, parse right from the next token
@@ -77,12 +70,7 @@ func (parser *Parser) aterm() (ast.IntegerTerm, error) {
 			return nil, err
 		}
 
-		// set root to the result
-		if opType == token.Multiply {
-			root = ast.Multiply(left, right)
-		} else {
-			root = ast.Divide(left, right)
-		}
+		root = operation(left, right)
 	}
 
 	return root, nil

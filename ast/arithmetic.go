@@ -28,7 +28,7 @@ func Plus(left IntegerTerm, right IntegerTerm) ArithmeticExp {
 
 // Returns a 'subtract' arithmetic expression between the two given terms
 func Subtract(left IntegerTerm, right IntegerTerm) ArithmeticExp {
-	return ArithmeticExp{left, right, subtract, "minus"}
+	return ArithmeticExp{left, right, subtract, "subtract"}
 }
 
 // Returns a 'multiply' arithmetic expression between the two given terms

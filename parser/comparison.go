@@ -29,7 +29,7 @@ func (parser *Parser) parseComparison() (ast.BooleanTerm, error) {
 		return nil, err
 	}
 
-	fun, ok := comparisonAsts[parser.currentToken.Type]
+	comparison, ok := comparisonAsts[parser.currentToken.Type]
 	if !ok {
 		return nil, fmt.Errorf("expected comparison operator but got %v", parser.currentToken)
 	}
@@ -40,5 +40,5 @@ func (parser *Parser) parseComparison() (ast.BooleanTerm, error) {
 		return nil, err
 	}
 
-	return fun(left, right), nil
+	return comparison(left, right), nil
 }
