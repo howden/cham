@@ -24,6 +24,20 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 	return p
 }
 
+func (parser *Parser) ParseProgram() (*ast.Reaction, error) {
+	reaction, err := parser.parseReaction()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = parser.expectToken(token.EOF)
+	if err != nil {
+		return nil, err
+	}
+
+	return reaction, nil
+}
+
 func (parser *Parser) advance() {
 	parser.currentToken = parser.peekToken
 	parser.peekToken = parser.lexer.NextToken()
@@ -40,23 +54,9 @@ func (parser *Parser) expectToken(expected token.TokenType) (bool, error) {
 	return expect(parser.currentToken, expected)
 }
 
-func (parser *Parser) ParseProgram() (*ast.Reaction, error) {
-	reaction, err := parser.ParseReaction()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = parser.expectToken(token.EOF)
-	if err != nil {
-		return nil, err
-	}
-
-	return reaction, nil
-}
-
-func (parser *Parser) ParseReaction() (*ast.Reaction, error) {
+func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 	// parse input
-	input, err := parser.ParseReactionInput()
+	input, err := parser.parseReactionInput()
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (parser *Parser) ParseReaction() (*ast.Reaction, error) {
 	}
 	parser.advance()
 
-	action, err := parser.ParseReactionAction()
+	action, err := parser.parseReactionAction()
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (parser *Parser) ParseReaction() (*ast.Reaction, error) {
 	}
 	parser.advance()
 
-	condition, err := parser.ParseBexp()
+	condition, err := parser.parseBexp()
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (parser *Parser) ParseReaction() (*ast.Reaction, error) {
 	}, nil
 }
 
-func (parser *Parser) ParseReactionInput() (*ast.ReactionInput, error) {
+func (parser *Parser) parseReactionInput() (*ast.ReactionInput, error) {
 	var identifiers []ast.Identifier
 	first := true
 
@@ -116,7 +116,7 @@ func (parser *Parser) ParseReactionInput() (*ast.ReactionInput, error) {
 	return &ast.ReactionInput{Idents: identifiers}, nil
 }
 
-func (parser *Parser) ParseReactionAction() (*ast.ReactionAction, error) {
+func (parser *Parser) parseReactionAction() (*ast.ReactionAction, error) {
 	openCurly, _ := parser.expectToken(token.OpenCurlyBracket)
 	if openCurly {
 		parser.advance()
@@ -142,7 +142,7 @@ func (parser *Parser) ParseReactionAction() (*ast.ReactionAction, error) {
 
 		// if first=true, or if there was a comma before, require that the next
 		// token is an ident, if not return an error
-		aexp, err := parser.ParseAexp()
+		aexp, err := parser.parseAexp()
 		if err != nil {
 			return nil, err
 		}
@@ -150,12 +150,4 @@ func (parser *Parser) ParseReactionAction() (*ast.ReactionAction, error) {
 	}
 
 	return &ast.ReactionAction{Products: aexps}, nil
-}
-
-func (parser *Parser) ParseAexp() (ast.IntegerTerm, error) {
-	return nil, nil // TODO
-}
-
-func (parser *Parser) ParseBexp() (ast.BooleanTerm, error) {
-	return nil, nil // TODO
 }
