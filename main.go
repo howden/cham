@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/howden/cham/eval"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/parser"
 	"os"
@@ -16,11 +17,18 @@ func main() {
 
 	src := strings.Join(os.Args[1:], " ")
 
-	textLexer(src)
-	testParser(src)
+	program, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
+	if err != nil {
+		parser.PrintParserError(src, err)
+		return
+	}
+
+	result := eval.Evaluate(program)
+	fmt.Println(result)
 }
 
-func textLexer(src string) {
+/*
+func demoLexer(src string) {
 	fmt.Println("Lexer Output:")
 	tokens, err := lexer.FromString(src).RemainingTokens()
 	if err != nil {
@@ -33,18 +41,13 @@ func textLexer(src string) {
 	fmt.Print("\n\n")
 }
 
-func testParser(src string) {
+func demoParser(src string) {
 	fmt.Println("Parser Output:")
 	ast, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
 	if err != nil {
-		if pe, ok := err.(*parser.ParserError); ok {
-			fmt.Println(err)
-			fmt.Printf("\n%s\n", src)
-			fmt.Printf("%s^ HERE\n", strings.Repeat(" ", pe.LexerCurrentColumn-2))
-		} else {
-			fmt.Println(err)
-		}
+		parser.PrintParserError(src, err)
 	} else {
 		fmt.Println(ast)
 	}
 }
+*/

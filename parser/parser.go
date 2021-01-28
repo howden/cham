@@ -5,6 +5,7 @@ import (
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/token"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 type Parser struct {
@@ -72,4 +73,14 @@ func (parser *Parser) wrapError(err error) *ParserError {
 	}
 
 	return &ParserError{cause: err, LexerCurrentLine: line, LexerCurrentColumn: col}
+}
+
+func PrintParserError(src string, err error) {
+	if pe, ok := err.(*ParserError); ok {
+		fmt.Println(err)
+		fmt.Printf("\n%s\n", src)
+		fmt.Printf("%s^ HERE\n", strings.Repeat(" ", pe.LexerCurrentColumn-2))
+	} else {
+		fmt.Println(err)
+	}
 }
