@@ -41,6 +41,11 @@ func Divide(left IntegerTerm, right IntegerTerm) ArithmeticExp {
 	return ArithmeticExp{left, right, divide, "divide"}
 }
 
+// Returns a 'modulo' arithmetic expression between the two given terms
+func Modulo(left IntegerTerm, right IntegerTerm) ArithmeticExp {
+	return ArithmeticExp{left, right, modulo, "modulo"}
+}
+
 func plus(state State, left IntegerTerm, right IntegerTerm) int {
 	return left.Eval(state) + right.Eval(state)
 }
@@ -55,4 +60,8 @@ func multiply(state State, left IntegerTerm, right IntegerTerm) int {
 
 func divide(state State, left IntegerTerm, right IntegerTerm) int {
 	return left.Eval(state) / right.Eval(state)
+}
+
+func modulo(state State, left IntegerTerm, right IntegerTerm) int {
+	return left.Eval(state) % right.Eval(state)
 }

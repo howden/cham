@@ -25,6 +25,7 @@ const (
 	Subtract           // -
 	Multiply           // *
 	Divide             // /
+	Modulo             // %
 	Comma              // ,
 	OpenBracket        // (
 	CloseBracket       // )
@@ -65,6 +66,7 @@ var names = map[TokenType]string{
 	Subtract:           "subtract",
 	Multiply:           "multiply",
 	Divide:             "divide",
+	Modulo:             "modulo",
 	Comma:              "comma",
 	OpenBracket:        "openBracket",
 	CloseBracket:       "closeBracket",

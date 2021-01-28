@@ -24,6 +24,7 @@ var addOps = map[token.TokenType]func(left ast.IntegerTerm, right ast.IntegerTer
 var multOps = map[token.TokenType]func(left ast.IntegerTerm, right ast.IntegerTerm) ast.ArithmeticExp{
 	token.Multiply: ast.Multiply,
 	token.Divide:   ast.Divide,
+	token.Modulo:   ast.Modulo,
 }
 
 // Parses an "aexp"

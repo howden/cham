@@ -28,8 +28,7 @@ func FromReader(input io.Reader, fileName string) *Lexer {
 		return unicode.IsLetter(ch) /*|| unicode.IsDigit(ch) && i > 0*/
 	}
 
-	l := &Lexer{&s}
-	return l
+	return &Lexer{&s}
 }
 
 // "Simple" tokens with a direct, non-ambiguous mapping from single character to token
@@ -44,6 +43,7 @@ var simpleTokens = map[rune]token.TokenType{
 	'-': token.Subtract,
 	'*': token.Multiply,
 	'/': token.Divide,
+	'%': token.Modulo,
 	',': token.Comma,
 }
 
