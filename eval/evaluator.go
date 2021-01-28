@@ -11,9 +11,19 @@ func Evaluate(prog *ast.Program) *Multiset {
 	multiset := NewMultiset()
 	multiset.AddAll(prog.Input)
 
+	for _, reaction := range prog.Reactions {
+		evaluateReaction(reaction, multiset)
+	}
+
+	return multiset
+}
+
+// Function to evaluate a reaction.
+func evaluateReaction(prog *ast.Reaction, multiset *Multiset) {
+
 	// Obtain a list of the identifiers used by the (single) reaction rule
 	// The length of this array becomes 'k' in the k-permutations calculation
-	idents := prog.Reaction.Input.Idents
+	idents := prog.Input.Idents
 	k := len(idents)
 
 	// Continuously attempt reactions until either:
@@ -49,7 +59,7 @@ func Evaluate(prog *ast.Program) *Multiset {
 			}
 
 			// Test the reaction condition - if it evaluates true, then a reaction can take place.
-			cond := prog.Reaction.Condition.Expression.Eval(programVariables)
+			cond := prog.Condition.Expression.Eval(programVariables)
 			if cond {
 				reaction = true
 
@@ -60,7 +70,7 @@ func Evaluate(prog *ast.Program) *Multiset {
 				}
 
 				// Add the reaction outputs (products) to the multiset
-				for _, aexp := range prog.Reaction.Action.Products {
+				for _, aexp := range prog.Action.Products {
 					product := aexp.Eval(programVariables)
 					multiset.Add(product)
 				}
@@ -72,6 +82,4 @@ func Evaluate(prog *ast.Program) *Multiset {
 			solved = true
 		}
 	}
-
-	return multiset
 }

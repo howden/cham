@@ -33,12 +33,25 @@ func (parser *Parser) parseProgram() (*ast.Program, error) {
 	}
 	parser.next()
 
-	reaction, err := parser.parseReaction()
+	var reactions []*ast.Reaction
+
+	first, err := parser.parseReaction()
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing program reaction")
 	}
+	reactions = append(reactions, first)
 
-	return &ast.Program{Input: input, Reaction: reaction}, nil
+	for parser.currentToken.Type == token.ReactionChain {
+		parser.next()
+
+		reaction, err := parser.parseReaction()
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing program reaction")
+		}
+		reactions = append(reactions, reaction)
+	}
+
+	return &ast.Program{Input: input, Reactions: reactions}, nil
 }
 
 func (parser *Parser) parseInput() ([]int, error) {
