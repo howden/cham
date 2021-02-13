@@ -26,7 +26,12 @@ func run(src string) {
 		return
 	}
 
-	result := eval.Evaluate(program)
+	result, err := eval.Evaluate(program)
+	if err != nil {
+		fmt.Printf("error evaluating: %s\n", err)
+		return
+	}
+
 	fmt.Println(result)
 }
 
@@ -34,7 +39,7 @@ func run(src string) {
 func runRepl() {
 	for {
 		src, err := getInput()
-		if err != nil {
+		if err != nil || src == "exit" {
 			return
 		}
 
@@ -48,6 +53,10 @@ func getInput() (string, error) {
 	prompt := promptui.Prompt{
 		Label: ">",
 		Validate: func(src string) error {
+			if src == "exit" {
+				return nil
+			}
+
 			_, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
 			err = parser.FormatErrorWithParserLocation(err)
 			return err

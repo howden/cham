@@ -7,7 +7,7 @@ import (
 // Interface to represent the program state.
 // (stores the values of variables in a given reaction)
 type State interface {
-	GetVar(ident Identifier) int
+	GetVar(ident Identifier) (int, error)
 }
 
 // Interface representing an integer term - just something that returns an int
@@ -16,7 +16,7 @@ type State interface {
 // - a number
 // - an ArithmeticExp
 type IntegerTerm interface {
-	Eval(state State) int
+	Eval(state State) (int, error)
 }
 
 // Type representing a boolean term.
@@ -24,7 +24,7 @@ type IntegerTerm interface {
 // - a Comparison
 // - a boolean expression - BooleanOr, BooleanAnd, BooleanNot
 type BooleanTerm interface {
-	Eval(state State) bool
+	Eval(state State) (bool, error)
 }
 
 // Creates an identifier
@@ -43,7 +43,7 @@ type Identifier struct {
 	name string
 }
 
-func (ident Identifier) Eval(state State) int {
+func (ident Identifier) Eval(state State) (int, error) {
 	return state.GetVar(ident)
 }
 
@@ -57,8 +57,8 @@ type number struct {
 	int int
 }
 
-func (number number) Eval(_ State) int {
-	return number.int
+func (number number) Eval(_ State) (int, error) {
+	return number.int, nil
 }
 
 func (number number) String() string {

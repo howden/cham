@@ -42,32 +42,57 @@ type booleanConst struct {
 	val bool
 }
 
-func (b booleanOr) Eval(state State) bool {
-	return b.left.Eval(state) || b.right.Eval(state)
+func (b booleanOr) Eval(state State) (bool, error) {
+	l, err := b.left.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	r, err := b.right.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	return l || r, nil
 }
 
 func (b booleanOr) String() string {
 	return fmt.Sprintf("boolOr{%v, %v}", b.left, b.right)
 }
 
-func (b booleanAnd) Eval(state State) bool {
-	return b.left.Eval(state) && b.right.Eval(state)
+func (b booleanAnd) Eval(state State) (bool, error) {
+	l, err := b.left.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	r, err := b.right.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	return l && r, nil
 }
 
 func (b booleanAnd) String() string {
 	return fmt.Sprintf("boolAnd{%v, %v}", b.left, b.right)
 }
 
-func (b booleanNot) Eval(state State) bool {
-	return !b.exp.Eval(state)
+func (b booleanNot) Eval(state State) (bool, error) {
+	exp, err := b.exp.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	return !exp, nil
 }
 
 func (b booleanNot) String() string {
 	return fmt.Sprintf("boolNot{%v}", b.exp)
 }
 
-func (b booleanConst) Eval(_ State) bool {
-	return b.val
+func (b booleanConst) Eval(_ State) (bool, error) {
+	return b.val, nil
 }
 
 func (b booleanConst) String() string {

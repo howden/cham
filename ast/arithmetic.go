@@ -9,12 +9,22 @@ import (
 type ArithmeticExp struct {
 	left         IntegerTerm
 	right        IntegerTerm
-	operator     func(state State, left IntegerTerm, right IntegerTerm) int
+	operator     func(left int, right int) int
 	operatorName string
 }
 
-func (a ArithmeticExp) Eval(state State) int {
-	return a.operator(state, a.left, a.right)
+func (a ArithmeticExp) Eval(state State) (int, error) {
+	l, err := a.left.Eval(state)
+	if err != nil {
+		return 0, err
+	}
+
+	r, err := a.right.Eval(state)
+	if err != nil {
+		return 0, err
+	}
+
+	return a.operator(l, r), nil
 }
 
 func (a ArithmeticExp) String() string {
@@ -46,22 +56,22 @@ func Modulo(left IntegerTerm, right IntegerTerm) ArithmeticExp {
 	return ArithmeticExp{left, right, modulo, "modulo"}
 }
 
-func plus(state State, left IntegerTerm, right IntegerTerm) int {
-	return left.Eval(state) + right.Eval(state)
+func plus(left int, right int) int {
+	return left + right
 }
 
-func subtract(state State, left IntegerTerm, right IntegerTerm) int {
-	return left.Eval(state) - right.Eval(state)
+func subtract(left int, right int) int {
+	return left - right
 }
 
-func multiply(state State, left IntegerTerm, right IntegerTerm) int {
-	return left.Eval(state) * right.Eval(state)
+func multiply(left int, right int) int {
+	return left * right
 }
 
-func divide(state State, left IntegerTerm, right IntegerTerm) int {
-	return left.Eval(state) / right.Eval(state)
+func divide(left int, right int) int {
+	return left / right
 }
 
-func modulo(state State, left IntegerTerm, right IntegerTerm) int {
-	return left.Eval(state) % right.Eval(state)
+func modulo(left int, right int) int {
+	return left % right
 }

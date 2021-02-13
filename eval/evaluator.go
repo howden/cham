@@ -2,24 +2,28 @@ package eval
 
 import (
 	"github.com/howden/cham/ast"
+	"github.com/pkg/errors"
 	"gonum.org/v1/gonum/stat/combin"
 )
 
 // Function to evaluate a program.
-func Evaluate(prog *ast.Program) *Multiset {
+func Evaluate(prog *ast.Program) (*Multiset, error) {
 	// Create a new multiset containing the program input
 	multiset := NewMultiset()
 	multiset.AddAll(prog.Input)
 
 	for _, reaction := range prog.Reactions {
-		evaluateReaction(reaction, multiset)
+		err := evaluateReaction(reaction, multiset)
+		if err != nil {
+			return nil, errors.Wrap(err, "error evaluating reaction")
+		}
 	}
 
-	return multiset
+	return multiset, nil
 }
 
 // Function to evaluate a reaction.
-func evaluateReaction(prog *ast.Reaction, multiset *Multiset) {
+func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
 
 	// Obtain a list of the identifiers used by the (single) reaction rule
 	// The length of this array becomes 'k' in the k-permutations calculation
@@ -59,7 +63,11 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) {
 			}
 
 			// Test the reaction condition - if it evaluates true, then a reaction can take place.
-			cond := prog.Condition.Expression.Eval(programVariables)
+			cond, err := prog.Condition.Expression.Eval(programVariables)
+			if err != nil {
+				return errors.Wrap(err, "error evaluating reaction condition")
+			}
+
 			if cond {
 				reaction = true
 
@@ -71,7 +79,11 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) {
 
 				// Add the reaction outputs (products) to the multiset
 				for _, aexp := range prog.Action.Products {
-					product := aexp.Eval(programVariables)
+					product, err := aexp.Eval(programVariables)
+					if err != nil {
+						return errors.Wrap(err, "error evaluating reaction product")
+					}
+
 					multiset.Add(product)
 				}
 			}
@@ -82,4 +94,6 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) {
 			solved = true
 		}
 	}
+
+	return nil
 }

@@ -8,12 +8,22 @@ import (
 type Comparison struct {
 	left         IntegerTerm
 	right        IntegerTerm
-	operator     func(state State, left IntegerTerm, right IntegerTerm) bool
+	operator     func(left int, right int) bool
 	operatorName string
 }
 
-func (c Comparison) Eval(state State) bool {
-	return c.operator(state, c.left, c.right)
+func (c Comparison) Eval(state State) (bool, error) {
+	l, err := c.left.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	r, err := c.right.Eval(state)
+	if err != nil {
+		return false, err
+	}
+
+	return c.operator(l, r), nil
 }
 
 func (c Comparison) String() string {
@@ -50,26 +60,26 @@ func GreaterThanEqual(left IntegerTerm, right IntegerTerm) BooleanTerm {
 	return &Comparison{left, right, greaterThanEqual, "greaterThanEqual"}
 }
 
-func equals(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) == right.Eval(state)
+func equals(left int, right int) bool {
+	return left == right
 }
 
-func notEquals(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) != right.Eval(state)
+func notEquals(left int, right int) bool {
+	return left != right
 }
 
-func lessThan(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) < right.Eval(state)
+func lessThan(left int, right int) bool {
+	return left < right
 }
 
-func greaterThan(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) > right.Eval(state)
+func greaterThan(left int, right int) bool {
+	return left > right
 }
 
-func lessThanEqual(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) <= right.Eval(state)
+func lessThanEqual(left int, right int) bool {
+	return left <= right
 }
 
-func greaterThanEqual(state State, left IntegerTerm, right IntegerTerm) bool {
-	return left.Eval(state) >= right.Eval(state)
+func greaterThanEqual(left int, right int) bool {
+	return left >= right
 }

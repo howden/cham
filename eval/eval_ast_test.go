@@ -12,7 +12,7 @@ func TestAexp(t *testing.T) {
 	// x + 2  ==>  3
 	aexp := ast.Plus(ast.Ident("x"), ast.Number(2))
 
-	result := aexp.Eval(state)
+	result, _ := aexp.Eval(state)
 	if result != 3 {
 		t.Errorf("expected 3 but got %d", result)
 	}
@@ -27,7 +27,7 @@ func TestBexp(t *testing.T) {
 		ast.Equals(ast.Ident("x"), ast.Number(1)),
 		ast.BooleanNot(ast.NotEquals(ast.Number(12), ast.Number(12))))
 
-	result := bexp.Eval(state)
+	result, _ := bexp.Eval(state)
 	if !result {
 		t.Errorf("expected true but got false")
 	}
@@ -40,7 +40,7 @@ func TestBexp2(t *testing.T) {
 	// (x - 2) > -5  ==>  true
 	bexp := ast.GreaterThan(ast.Subtract(ast.Ident("x"), ast.Number(2)), ast.Number(-5))
 
-	result := bexp.Eval(state)
+	result, _ := bexp.Eval(state)
 	if !result {
 		t.Errorf("expected true but got false")
 	}
