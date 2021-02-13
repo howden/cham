@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/token"
@@ -82,5 +83,16 @@ func PrintParserError(src string, err error) {
 		fmt.Printf("%s^ HERE\n", strings.Repeat(" ", pe.LexerCurrentColumn-2))
 	} else {
 		fmt.Println(err)
+	}
+}
+
+func FormatErrorWithParserLocation(err error) error {
+	if pe, ok := err.(*ParserError); ok {
+		var buf bytes.Buffer
+		_, _ = fmt.Fprintf(&buf, "%s^ ", strings.Repeat(" ", pe.LexerCurrentColumn))
+		_, _ = fmt.Fprint(&buf, err)
+		return errors.New(buf.String())
+	} else {
+		return err
 	}
 }

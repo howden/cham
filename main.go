@@ -5,18 +5,21 @@ import (
 	"github.com/howden/cham/eval"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/parser"
+	"github.com/manifoldco/promptui"
 	"os"
 	"strings"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("./cham <program>")
-		return
+		runRepl()
+	} else {
+		run(strings.Join(os.Args[1:], " "))
 	}
+}
 
-	src := strings.Join(os.Args[1:], " ")
-
+// Runs a program and outputs the result to STDOUT
+func run(src string) {
 	program, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
 	if err != nil {
 		parser.PrintParserError(src, err)
@@ -25,6 +28,38 @@ func main() {
 
 	result := eval.Evaluate(program)
 	fmt.Println(result)
+}
+
+// Runs the REPL (read eval print loop)
+func runRepl() {
+	for {
+		src, err := getInput()
+		if err != nil {
+			return
+		}
+
+		run(src)
+	}
+}
+
+// Prompts for input from the terminal
+func getInput() (string, error) {
+	bold := promptui.Styler(promptui.FGBold)
+	prompt := promptui.Prompt{
+		Label: ">",
+		Validate: func(src string) error {
+			_, err := parser.NewParser(lexer.FromString(src)).ParseProgramFully()
+			err = parser.FormatErrorWithParserLocation(err)
+			return err
+		},
+		Templates: &promptui.PromptTemplates{
+			Prompt:  fmt.Sprintf("%s {{ . | bold }} ", bold(promptui.IconInitial)),
+			Valid:   fmt.Sprintf("%s {{ . | bold }} ", bold(promptui.IconGood)),
+			Invalid: fmt.Sprintf("%s {{ . | bold }} ", bold(promptui.IconBad)),
+			Success: fmt.Sprintf("{{ . | faint }} "),
+		},
+	}
+	return prompt.Run()
 }
 
 /*
