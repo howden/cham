@@ -19,6 +19,11 @@ func BooleanNot(term BooleanTerm) BooleanTerm {
 	return &booleanNot{term}
 }
 
+// Boolean expression that always evaluates to true
+func BooleanTrue() BooleanTerm {
+	return &booleanConst{true}
+}
+
 type booleanOr struct {
 	left  BooleanTerm
 	right BooleanTerm
@@ -31,6 +36,10 @@ type booleanAnd struct {
 
 type booleanNot struct {
 	exp BooleanTerm
+}
+
+type booleanConst struct {
+	val bool
 }
 
 func (b booleanOr) Eval(state State) bool {
@@ -55,4 +64,16 @@ func (b booleanNot) Eval(state State) bool {
 
 func (b booleanNot) String() string {
 	return fmt.Sprintf("boolNot{%v}", b.exp)
+}
+
+func (b booleanConst) Eval(_ State) bool {
+	return b.val
+}
+
+func (b booleanConst) String() string {
+	if b.val {
+		return "boolTrue"
+	} else {
+		return "boolFalse"
+	}
 }

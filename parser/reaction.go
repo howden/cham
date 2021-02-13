@@ -24,13 +24,7 @@ func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 		return nil, errors.Wrap(err, "error parsing reaction action")
 	}
 
-	// expect if
-	if ok, err := parser.expectToken(token.If); !ok {
-		return nil, err
-	}
-	parser.next()
-
-	condition, err := parser.parseBexp()
+	condition, err := parser.parseReactionCondition()
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing reaction condition")
 	}
@@ -38,7 +32,7 @@ func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 	return &ast.Reaction{
 		Input:     input,
 		Action:    action,
-		Condition: &ast.ReactionCondition{Expression: condition},
+		Condition: condition,
 	}, nil
 }
 
@@ -108,4 +102,18 @@ func (parser *Parser) parseReactionAction() (*ast.ReactionAction, error) {
 	}
 
 	return &ast.ReactionAction{Products: aexps}, nil
+}
+
+func (parser *Parser) parseReactionCondition() (*ast.ReactionCondition, error) {
+	if ok, _ := parser.expectToken(token.If); !ok {
+		return &ast.ReactionCondition{Expression: ast.BooleanTrue()}, nil
+	}
+	parser.next()
+
+	condition, err := parser.parseBexp()
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing reaction condition")
+	}
+
+	return &ast.ReactionCondition{Expression: condition}, nil
 }
