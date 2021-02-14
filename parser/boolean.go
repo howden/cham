@@ -6,7 +6,7 @@ import (
 	"github.com/howden/cham/token"
 )
 
-// arithmetic.go contains the parsing code for boolean expressions.
+// boolean.go contains the parsing code for boolean expressions.
 //
 // Context-free grammar accepted by this parser:
 //   <bexp> ::= <bterm> {<or> <bterm>}

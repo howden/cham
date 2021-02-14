@@ -89,7 +89,7 @@ func PrintParserError(src string, err error) {
 func FormatErrorWithParserLocation(err error) error {
 	if pe, ok := err.(*ParserError); ok {
 		var buf bytes.Buffer
-		_, _ = fmt.Fprintf(&buf, "%s^ ", strings.Repeat(" ", pe.LexerCurrentColumn))
+		_, _ = fmt.Fprintf(&buf, "%s^ ", strings.Repeat(" ", pe.LexerCurrentColumn-1))
 		_, _ = fmt.Fprint(&buf, err)
 		return errors.New(buf.String())
 	} else {
