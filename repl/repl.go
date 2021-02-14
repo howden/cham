@@ -21,6 +21,8 @@ func StartRepl() {
 				fmt.Println("Goodbye!")
 				return
 			}
+
+			fmt.Printf("unknown command: %s\n", command)
 		}
 
 		PrintEvalOutput(input)
@@ -34,6 +36,7 @@ func validateInput(input string) error {
 		if command == "q" || command == "quit" {
 			return nil
 		}
+		return fmt.Errorf("unknown command: %s", command)
 	}
 
 	// program

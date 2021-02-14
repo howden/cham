@@ -31,7 +31,7 @@ func (parser *Parser) next() {
 // Tests whether the token matches the expected token type
 func expect(token token.Token, expected token.TokenType) (ok bool, err error) {
 	if token.Type != expected {
-		return false, fmt.Errorf("expected token %v but got %v instead", expected, token.Type)
+		return false, fmt.Errorf("expected token %v but got %v instead", expected, token)
 	}
 	return true, nil
 }
