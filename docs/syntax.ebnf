@@ -1,0 +1,64 @@
+<digit> ::= '0' | '1' | '2' | ... | '7' | '8' | '9'
+<number> ::= <digit> {<digit>}
+
+<char> ::= 'a' | 'b' | 'c' | ... | 'x' | 'y' | 'z'
+<ident> ::= <char> {<char>}
+
+<openb> ::= '('
+<closeb> ::= ')'
+<opencb> ::= '{'
+<closecb> ::= '}'
+<comma> ::= ','
+
+<variable> ::= <ident> | <number>
+
+<comp-op> ::= '<' | '>' | '<=' | '>=' | '==' | '!='
+<comparison> ::= <aexp> <comp-op> <aexp>
+
+<bool-value> ::= <comparison>
+
+<or> ::= '||'
+<and> ::= '&&'
+<not> ::= '!'
+
+<bexp> ::= <bterm> {<or> <bterm>}
+<bterm> ::= <bnotfactor> {<and> <bnotfactor>}
+<bnotfactor> ::= <not> <bfactor>
+<bnotfactor> ::= <bfactor>
+<bfactor> ::= <bool-value>
+<bfactor> ::= <openb> <bexp> <closeb>
+
+<plus> ::= '+'
+<subtract> ::= '-'
+<multiply> ::= '*'
+<divide> ::= '/'
+<modulo> ::= '%'
+
+<addop> ::= <plus> | <subtract>
+<multop> ::= <multiply> | <divide> | <modulo>
+
+<aexp> ::= <aterm> {<addop> <aexp>}
+<aterm> ::= <afactor> {<multop> <aterm>}
+<afactor> ::= <variable>
+<afactor> ::= <openb> <aexp> <closeb>
+
+<reaction-input> ::= <ident> {<comma> <ident>}
+
+<reaction-output-items> ::= <aexp> {<comma> <aexp>}
+<reaction-output> ::= <opencb> <reaction-output-items> <closecb>
+<reaction-output> ::= <reaction-output-items>
+<reaction-output> ::= <opencb> <closecb>
+
+<if> ::= 'if'
+<reaction-condition> ::= <if> <bexp>
+
+<reaction-op> ::= '=>'
+<reaction> ::= <reaction-input> <reaction-op> <reaction-output>
+<reaction> ::= <reaction-input> <reaction-op> <reaction-output> <reaction-condition>
+
+<program-input-items> ::= <number> {<comma> <number>}
+<program-input> ::= <opencb> <program-input-items> <closecb>
+<program-input> ::= <program-input-items>
+
+<reaction-chain> ::= '|'
+<program> ::= <program-input> <reaction-chain> <reaction> {<reaction-chain> <reaction>}
