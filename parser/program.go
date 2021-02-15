@@ -15,7 +15,7 @@ func (parser *Parser) ParseProgramFully() (*ast.Program, error) {
 
 	_, err = parser.expectToken(token.EOF)
 	if err != nil {
-		return nil, err
+		return nil, parser.wrapError(err)
 	}
 
 	return program, nil
