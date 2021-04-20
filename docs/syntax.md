@@ -49,6 +49,8 @@ An `<ident>` (identifier) is one or more lower-case characters. Identifiers cann
 <closeb> ::= ')'
 <opencb> ::= '{'
 <closecb> ::= '}'
+<opensb> ::= '['
+<closesb> ::= ']'
 <comma> ::= ','
 ```
 
@@ -150,34 +152,65 @@ The supported artithmetic operators are addition, subtraction, multiplication, i
 > ```
 
 
+## Tuples
+Tuples are composites of other elements, denoted by square brackets (`[` `]`).
+```ebnf
+<ident-items> ::= <ident> {<comma> <ident>}
+<ident-tuple> ::= <ident>
+<ident-tuple> ::= <opensb> <ident-items> <opensb>
+
+<number-items> ::= <number> {<comma> <number>}
+<number-tuple> ::= <number>
+<number-tuple> ::= <opensb> <number-items> <opensb>
+
+<aexp-items> ::= <aexp> {<comma> <aexp>}
+<aexp-tuple> ::= <aexp>
+<aexp-tuple> ::= <opensb> <aexp-items> <opensb>
+```
+
+A tuple is like an array, but with a shape that is known at 'compile' time. It is basically a composite value holder for zero or more ints, int terms or identifiers.
+
+Tuples are limited to one dimension - a tuple cannot contain another tuple (can't be nested). Tuples must always contain at least one element.
+
+Tuple rules are defined for `ident`, `number` and `aexp`.
+
+> **Examples** (`<ident-tuple>`)
+>
+> ```
+> x
+> [x]
+> [x, y]
+> ```
+
 ## Reactions
 A reaction is formed of input, output and a condition.
 
 ### Reaction Input
 ```ebnf
-<reaction-input> ::= <ident> {<comma> <ident>}
+<reaction-input> ::= <ident-tuple> {<comma> <ident-tuple>}
 ```
 
-The input into a reaction is a comma separated list of one or more identifiers.
+The input into a reaction is a comma separated list of one or more identifiers/identifier tuples.
 
 > **Examples**
 >
 > ```
 > x
 > x, y
+> [i,x], y
 > ```
 
 ### Reaction Output
 ```ebnf
-<reaction-output-items> ::= <aexp> {<comma> <aexp>}
+<reaction-output-items> ::= <aexp-tuple> {<comma> <aexp-tuple>}
 <reaction-output> ::= <opencb> <reaction-output-items> <closecb>
 <reaction-output> ::= <reaction-output-items>
 <reaction-output> ::= <opencb> <closecb>
 ```
 
-The output of a reaction is a comma separated list of zero or more arithemeic expressions.
+The output of a reaction is a comma separated list of zero or more arithmetic expressions / arithmetic expression tuples.
 
-In the case where there are are no reaction products, two curly brackets must be specified (`{}`), but otherwise, these are optional.
+In the case where there are no reaction products, two curly brackets must be specified (`{}`), but otherwise, these are optional.
 
 > **Examples**
 >
@@ -186,6 +219,7 @@ In the case where there are are no reaction products, two curly brackets must be
 > {a}
 > {a+1}
 > {x-1, x-2}
+> {[x,0], [y,y+1]}
 > ```
 
 ### Reaction Condition
@@ -221,18 +255,19 @@ Programs are formed of an initial input multiset, followed by one or more reacti
 
 ### Program Input
 ```ebnf
-<program-input-items> ::= <number> {<comma> <number>}
+<program-input-items> ::= <number-tuple> {<comma> <number-tuple>}
 <program-input> ::= <opencb> <program-input-items> <closecb>
 <program-input> ::= <program-input-items>
 ```
 
-The input into a program is a comma separated list of one or more numbers (a multiset).
+The input into a program is a comma separated list of one or more numbers/number tuples (a multiset).
 
 > **Examples**
 >
 > ```
 > 1, 2, 3
 > {1, 2, 3}
+> {[0, 1], [0, 2], [0, 3]}
 > ```
 
 ### Program

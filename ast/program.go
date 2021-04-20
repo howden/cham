@@ -1,9 +1,13 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
+// A program is made up of input in the form of an array of int tuples,
+// and a sequence of reaction rules to apply in order.
 type Program struct {
-	Input     []int
+	Input     []IntTuple
 	Reactions []*Reaction
 }
 

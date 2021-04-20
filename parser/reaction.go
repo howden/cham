@@ -37,25 +37,25 @@ func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 }
 
 func (parser *Parser) parseReactionInput() (*ast.ReactionInput, error) {
-	var identifiers []ast.Identifier
+	var identifiers []ast.IdentifierTuple
 
-	first, err := parser.parseIdent()
+	first, err := parser.parseIdentTuple()
 	if err != nil {
 		return nil, err
 	}
-	identifiers = append(identifiers, ast.Ident(first))
+	identifiers = append(identifiers, *first)
 
 	// keep accepting more identifiers while there are commas
 	for parser.currentToken.Type == token.Comma {
 		parser.next()
 
-		ident, err := parser.parseIdent()
+		ident, err := parser.parseIdentTuple()
 		if err != nil {
 			return nil, err
 		}
 
 		// append the identifier to the slice and advance the parser
-		identifiers = append(identifiers, ast.Ident(ident))
+		identifiers = append(identifiers, *ident)
 	}
 
 	return &ast.ReactionInput{Idents: identifiers}, nil
@@ -69,28 +69,28 @@ func (parser *Parser) parseReactionAction() (*ast.ReactionAction, error) {
 		// if immediately closed, return an empty products slice
 		if closeCurly, _ := parser.expectToken(token.CloseCurlyBracket); closeCurly {
 			parser.next()
-			return &ast.ReactionAction{Products: []ast.IntegerTerm{}}, nil
+			return &ast.ReactionAction{Products: []ast.IntegerTermTuple{}}, nil
 		}
 	}
 
 	// otherwise, expect aexps separated by commas
-	var aexps []ast.IntegerTerm
+	var aexps []ast.IntegerTermTuple
 
-	first, err := parser.parseAexp()
+	first, err := parser.parseAexpTuple()
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing arithmetic expression")
+		return nil, err
 	}
-	aexps = append(aexps, first)
+	aexps = append(aexps, *first)
 
 	// keep accepting more aexps while there are commas
 	for parser.currentToken.Type == token.Comma {
 		parser.next()
 
-		aexp, err := parser.parseAexp()
+		aexp, err := parser.parseAexpTuple()
 		if err != nil {
-			return nil, errors.Wrap(err, "error parsing arithmetic expression")
+			return nil, err
 		}
-		aexps = append(aexps, aexp)
+		aexps = append(aexps, *aexp)
 	}
 
 	if openCurly {

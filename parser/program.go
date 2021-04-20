@@ -54,7 +54,7 @@ func (parser *Parser) parseProgram() (*ast.Program, error) {
 	return &ast.Program{Input: input, Reactions: reactions}, nil
 }
 
-func (parser *Parser) parseInput() ([]int, error) {
+func (parser *Parser) parseInput() ([]ast.IntTuple, error) {
 	openCurly, _ := parser.expectToken(token.OpenCurlyBracket)
 	if openCurly {
 		parser.next()
@@ -62,28 +62,28 @@ func (parser *Parser) parseInput() ([]int, error) {
 		// if immediately closed, return an empty input slice
 		if closeCurly, _ := parser.expectToken(token.CloseCurlyBracket); closeCurly {
 			parser.next()
-			return []int{}, nil
+			return []ast.IntTuple{}, nil
 		}
 	}
 
 	// otherwise, expect numbers separated by commas
-	var ints []int
+	var ints []ast.IntTuple
 
-	first, err := parser.parseNumber()
+	first, err := parser.parseNumberTuple()
 	if err != nil {
 		return nil, err
 	}
-	ints = append(ints, first)
+	ints = append(ints, *first)
 
 	// keep accepting more numbers while there are commas
 	for parser.currentToken.Type == token.Comma {
 		parser.next()
 
-		num, err := parser.parseNumber()
+		num, err := parser.parseNumberTuple()
 		if err != nil {
 			return nil, err
 		}
-		ints = append(ints, num)
+		ints = append(ints, *num)
 	}
 
 	if openCurly {

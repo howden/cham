@@ -31,6 +31,8 @@ const (
 	CloseBracket       // )
 	OpenCurlyBracket   // {
 	CloseCurlyBracket  // }
+	OpenSquareBracket  // [
+	CloseSquareBracket // ]
 )
 
 func (t TokenType) New() Token {
@@ -72,6 +74,8 @@ var names = map[TokenType]string{
 	CloseBracket:       "closeBracket",
 	OpenCurlyBracket:   "openCurlyBracket",
 	CloseCurlyBracket:  "closeCurlyBracket",
+	OpenSquareBracket:  "openSquareBracket",
+	CloseSquareBracket: "closeSquareBracket",
 }
 
 func (t TokenType) String() string {

@@ -39,6 +39,8 @@ var simpleTokens = map[rune]token.TokenType{
 	')': token.CloseBracket,
 	'{': token.OpenCurlyBracket,
 	'}': token.CloseCurlyBracket,
+	'[': token.OpenSquareBracket,
+	']': token.CloseSquareBracket,
 	'+': token.Plus,
 	'-': token.Subtract,
 	'*': token.Multiply,

@@ -12,15 +12,15 @@ type Reaction struct {
 }
 
 // Represents the reaction input
-// Just an array of identifiers, can be empty.
+// Just an array of identifier tuples, can be empty.
 type ReactionInput struct {
-	Idents []Identifier
+	Idents []IdentifierTuple
 }
 
 // Represents the reaction action
-// This is formed of products: an array of int terms, which could be empty.
+// This is formed of products: an array of int term tuples, which could be empty.
 type ReactionAction struct {
-	Products []IntegerTerm
+	Products []IntegerTermTuple
 }
 
 // Represents the reaction condition

@@ -50,6 +50,8 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
 		// Continuously try reactions using values determined by the permutation
 		// generator until one 'happens' (the reaction condition is satisfied).
 		reaction := false
+
+	permutationLoop:
 		for !reaction && generator.Next() {
 
 			// Populate the 'permutation' slice with the next permutation from the generator
@@ -57,9 +59,18 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
 
 			// Create & populate a new state to hold the program variables during the reaction
 			programVariables := NewState()
-			for i, ident := range idents {
-				value := multisetSlice[permutation[i]]
-				programVariables.PutVar(ident, value)
+			for i, identTuple := range idents {
+				valueTuple := multisetSlice[permutation[i]]
+
+				// If the shape of the identifer tuple doesn't match the shape of the value tuple,
+				// then a reaction is not possible, so continue the outer loop.
+				if !ast.ShapeMatches(identTuple, valueTuple) {
+					continue permutationLoop
+				}
+
+				for i, ident := range identTuple.Values {
+					programVariables.PutVar(ident, valueTuple.Values[i])
+				}
 			}
 
 			// Test the reaction condition - if it evaluates true, then a reaction can take place.
@@ -78,13 +89,16 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
 				}
 
 				// Add the reaction outputs (products) to the multiset
-				for _, aexp := range prog.Action.Products {
-					product, err := aexp.Eval(programVariables)
-					if err != nil {
-						return errors.Wrap(err, "error evaluating reaction product")
+				for _, aexpTuple := range prog.Action.Products {
+					products := make([]int, 0, aexpTuple.Dimensions())
+					for _, aexp := range aexpTuple.Values {
+						product, err := aexp.Eval(programVariables)
+						if err != nil {
+							return errors.Wrap(err, "error evaluating reaction product")
+						}
+						products = append(products, product)
 					}
-
-					multiset.Add(product)
+					multiset.Add(ast.CreateIntTuple(products))
 				}
 			}
 		}
