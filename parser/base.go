@@ -29,6 +29,12 @@ func (parser *Parser) parseVariable() (ast.IntegerTerm, error) {
 }
 
 func (parser *Parser) parseNumber() (int, error) {
+	sign := 1
+	if parser.currentToken.Type == token.Subtract {
+		parser.next()
+		sign = -1
+	}
+
 	ok, err := parser.expectToken(token.Number)
 	if !ok {
 		return 0, err
@@ -40,7 +46,7 @@ func (parser *Parser) parseNumber() (int, error) {
 	}
 
 	parser.next()
-	return i, nil
+	return sign * i, nil
 }
 
 func (parser *Parser) parseIdent() (string, error) {

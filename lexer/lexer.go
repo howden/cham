@@ -93,7 +93,7 @@ func (lexer *Lexer) NextToken() token.Token {
 	} else if desc, found := simpleTokens[tok]; found {
 		return desc.New()
 	} else {
-		return token.Error(fmt.Errorf("unknown token '%s' at %s", s.TokenText(), s.Pos()))
+		return token.Error(fmt.Errorf("unknown token '%s' type %s at %s", s.TokenText(), scanner.TokenString(tok), s.Pos()))
 	}
 }
 

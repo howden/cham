@@ -15,6 +15,7 @@ A full (uncommented) version of the grammar is also available.
     * [Comparisons](#comparisons)
     * [Boolean Expressions](#boolean-expressions)
     * [Arithmetic Expressions](#arithmetic-expressions)
+    * [Tuples](#tuples)
 * [Reactions](#reactions)
     * [Reaction Input](#reaction-input)
     * [Reaction Output](#reaction-output)
@@ -152,7 +153,7 @@ The supported artithmetic operators are addition, subtraction, multiplication, i
 > ```
 
 
-## Tuples
+### Tuples
 Tuples are composites of other elements, denoted by square brackets (`[` `]`).
 ```ebnf
 <ident-items> ::= <ident> {<comma> <ident>}
