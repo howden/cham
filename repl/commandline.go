@@ -31,7 +31,7 @@ func HandleCommandLine(args []string) {
 }
 
 func PrintHelp() {
-	fmt.Print(`CHAM Interpreter v0.1
+	fmt.Print(`CHAM Interpreter v1.0
 
   COMMANDS
     cham               Runs the REPL
@@ -51,6 +51,7 @@ func PrintHelp() {
 
   REPL COMMANDS
     :quit :q   quit the REPL
+    :store :s  view a list of reactions saved in the REPLs memory
 
 `)
 }

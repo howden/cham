@@ -25,7 +25,7 @@ func FromReader(input io.Reader, fileName string) *Lexer {
 	s.Filename = fileName
 	s.Mode = scanner.ScanIdents | scanner.ScanFloats | /*scanner.ScanChars | scanner.ScanStrings |*/ scanner.ScanComments | scanner.SkipComments
 	s.IsIdentRune = func(ch rune, i int) bool {
-		return unicode.IsLetter(ch) /*|| unicode.IsDigit(ch) && i > 0*/
+		return (unicode.IsLetter(ch) && unicode.IsLower(ch)) || ch == '_' /*|| unicode.IsDigit(ch) && i > 0*/
 	}
 
 	return &Lexer{&s}
@@ -34,6 +34,7 @@ func FromReader(input io.Reader, fileName string) *Lexer {
 // "Simple" tokens with a direct, non-ambiguous mapping from single character to token
 var simpleTokens = map[rune]token.TokenType{
 	'|': token.ReactionChain,
+	':': token.ReactionDef,
 	'!': token.Not,
 	'(': token.OpenBracket,
 	')': token.CloseBracket,

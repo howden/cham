@@ -13,6 +13,31 @@ func ParseProgram(src string) (*ast.Program, error) {
 	return parser.NewParser(lexer.FromString(src)).ParseProgramFully()
 }
 
+// Parses a program or reaction definition
+func ParseProgramOrReaction(src string, store *eval.ReactionStore) (*ast.Program, *ast.ReactionPointer, error) {
+	return parser.NewParser(lexer.FromString(src)).ParseProgramOrReactionDefFully(store)
+}
+
+func HandleReplInput(src string, store *eval.ReactionStore) {
+	program, reactionDef, err := ParseProgramOrReaction(src, store)
+	if err != nil {
+		parser.PrintParserError(src, err)
+		return
+	}
+
+	if program != nil {
+		result, err := eval.Evaluate(program)
+		if err != nil {
+			fmt.Printf("error evaluating: %s\n", err)
+		} else {
+			fmt.Println(result)
+		}
+	} else if reactionDef != nil {
+		store.Put(reactionDef)
+		fmt.Println("OK")
+	}
+}
+
 // Runs a program and prints the result to STDOUT
 func PrintEvalOutput(src string) {
 	program, err := ParseProgram(src)

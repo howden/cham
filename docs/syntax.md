@@ -38,11 +38,11 @@ A `<number>` is one or more digits.
 
 ### Characters and Identifiers
 ```ebnf
-<char> ::= 'a' | 'b' | 'c' | ... | 'x' | 'y' | 'z'
+<char> ::= 'a' | 'b' | 'c' | ... | 'x' | 'y' | 'z' | '_'
 <ident> ::= <char> {<char>}
 ```
 
-An `<ident>` (identifier) is one or more lower-case characters. Identifiers cannot contain upper case characters or digits.
+An `<ident>` (identifier) is one or more lower-case characters or underscores. Identifiers cannot contain upper case characters or digits.
 
 ### Grouping and Separators
 ```ebnf
@@ -271,13 +271,50 @@ The input into a program is a comma separated list of one or more numbers/number
 > {[0, 1], [0, 2], [0, 3]}
 > ```
 
-### Program
+### Reaction definitions
 ```ebnf
 <reaction-chain> ::= '|'
-<program> ::= <program-input> <reaction-chain> <reaction> {<reaction-chain> <reaction>}
+
+<reaction-def-operator> ::= ':'
+<reaction-def-statement> ::= <ident> <reaction-def-operator> <reaction> {<reaction-chain> <reaction>}
 ```
 
-A program is an executable chain of reactions. The `<reaction-chain>` operator is used to link reactions together.
+When in REPL mode, it is possible to define and store reactions for later use.
+
+The `<reaction-chain>` operator is used to link reactions together.
+
+> **Example**: single reaction (`<reaction-def-statement>`)
+>
+> ```
+>  max : x, y => x if x > y
+> |---|                      <-- ident
+>     |-|                    <-- reaction-def-operator
+>       |------------------| <-- reaction
+> ```
+>
+> **Example**: multiple reactions (`<reaction-def-statement>`)
+>
+> ```
+>  fib : x => {x-1, x-2} if x>1 | x,y => x+y
+> |---|                                       <-- ident
+>     |-|                                     <-- reaction-def-operator
+>       |----------------------|              <-- reaction
+>                              |-|            <-- reaction-chain
+>                                |----------| <-- reaction
+> ```
+
+
+### Program
+```ebnf
+<reaction-pointer> ::= <reaction>
+<reaction-pointer> ::= <reaction-def-operator> <ident>
+
+<program> ::= <program-input> <reaction-chain> <reaction-pointer> {<reaction-chain> <reaction-pointer>}
+```
+
+A program is made up of initial input followed by an executable chain of reactions (or reaction pointers).
+
+Reaction pointers are available in REPL mode, and point to reactions which have already been defined.
 
 > **Example**: single reaction
 >

@@ -4,6 +4,12 @@ import (
 	"fmt"
 )
 
+// AST encapsulating a defined reaction
+type ReactionPointer struct {
+	Identifier Identifier
+	Reactions  []*Reaction
+}
+
 // AST encapsulating a single reaction
 type Reaction struct {
 	Input     *ReactionInput

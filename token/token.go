@@ -10,6 +10,7 @@ const (
 	Ident
 	Number
 	ReactionChain      // |
+	ReactionDef        // :
 	ReactionOp         // =>
 	If                 // if
 	LessThan           // <
@@ -53,6 +54,7 @@ var names = map[TokenType]string{
 	Ident:              "ident",
 	Number:             "number",
 	ReactionChain:      "reactionChain",
+	ReactionDef:        "reactionDef",
 	ReactionOp:         "reactionOp",
 	If:                 "if",
 	LessThan:           "lessThan",

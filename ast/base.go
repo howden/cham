@@ -51,6 +51,10 @@ func (ident Identifier) String() string {
 	return fmt.Sprintf("ident(%s)", ident.name)
 }
 
+func (ident Identifier) Name() string {
+	return ident.name
+}
+
 // Struct representing a number
 // These are used in the action/condition
 type number struct {

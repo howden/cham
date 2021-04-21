@@ -2,9 +2,37 @@ package parser
 
 import (
 	"github.com/howden/cham/ast"
+	"github.com/howden/cham/eval"
 	"github.com/howden/cham/token"
 	"github.com/pkg/errors"
 )
+
+func (parser *Parser) parseReactionPointer(store *eval.ReactionStore) ([]*ast.Reaction, error) {
+	if parser.currentToken.Type == token.ReactionDef {
+		if store == nil {
+			return nil, errors.New("reaction defs are only supported in repl mode")
+		}
+
+		parser.next()
+		ident, err := parser.parseIdent()
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing reaction ident")
+		}
+
+		reactions, err := store.Get(ast.Ident(ident))
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing reaction from def")
+		}
+
+		return reactions, nil
+	} else {
+		reaction, err := parser.parseReaction()
+		if err != nil {
+			return nil, err
+		}
+		return []*ast.Reaction{reaction}, nil
+	}
+}
 
 func (parser *Parser) parseReaction() (*ast.Reaction, error) {
 	// parse input

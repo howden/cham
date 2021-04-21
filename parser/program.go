@@ -2,13 +2,14 @@ package parser
 
 import (
 	"github.com/howden/cham/ast"
+	"github.com/howden/cham/eval"
 	"github.com/howden/cham/token"
 	"github.com/pkg/errors"
 )
 
 // Parses a full program, terminated by EOF
 func (parser *Parser) ParseProgramFully() (*ast.Program, error) {
-	program, err := parser.parseProgram()
+	program, err := parser.parseProgram(nil)
 	if err != nil {
 		return nil, parser.wrapError(err)
 	}
@@ -21,7 +22,56 @@ func (parser *Parser) ParseProgramFully() (*ast.Program, error) {
 	return program, nil
 }
 
-func (parser *Parser) parseProgram() (*ast.Program, error) {
+// Parses a full program or reaction definition, terminated by EOF
+func (parser *Parser) ParseProgramOrReactionDefFully(store *eval.ReactionStore) (*ast.Program, *ast.ReactionPointer, error) {
+	var program *ast.Program
+	var reaction *ast.ReactionPointer
+	var err error
+
+	if parser.currentToken.Type == token.Ident {
+		reaction, err = parser.parseReactionDefinition(store)
+		if err != nil {
+			return nil, nil, parser.wrapError(err)
+		}
+	} else {
+		program, err = parser.parseProgram(store)
+		if err != nil {
+			return nil, nil, parser.wrapError(err)
+		}
+	}
+
+	_, err = parser.expectToken(token.EOF)
+	if err != nil {
+		return nil, nil, parser.wrapError(err)
+	}
+
+	return program, reaction, nil
+}
+
+func (parser *Parser) parseReactionDefinition(store *eval.ReactionStore) (*ast.ReactionPointer, error) {
+	ident, err := parser.parseIdent()
+	if err != nil {
+		return nil, err
+	}
+
+	// expect reaction-def
+	if ok, err := parser.expectToken(token.ReactionDef); !ok {
+		return nil, err
+	}
+	parser.next()
+
+	reactions, err := parser.parseReactions(store)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.ReactionPointer{
+		Identifier: ast.Ident(ident),
+		Reactions:  reactions,
+	}, nil
+}
+
+func (parser *Parser) parseProgram(store *eval.ReactionStore) (*ast.Program, error) {
 	input, err := parser.parseInput()
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing program input")
@@ -33,25 +83,38 @@ func (parser *Parser) parseProgram() (*ast.Program, error) {
 	}
 	parser.next()
 
+	reactions, err := parser.parseReactions(store)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.Program{Input: input, Reactions: reactions}, nil
+}
+
+func (parser *Parser) parseReactions(store *eval.ReactionStore) ([]*ast.Reaction, error) {
 	var reactions []*ast.Reaction
 
-	first, err := parser.parseReaction()
+	first, err := parser.parseReactionPointer(store)
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing program reaction")
 	}
-	reactions = append(reactions, first)
+	for _, r := range first {
+		reactions = append(reactions, r)
+	}
 
 	for parser.currentToken.Type == token.ReactionChain {
 		parser.next()
 
-		reaction, err := parser.parseReaction()
+		reaction, err := parser.parseReactionPointer(store)
 		if err != nil {
 			return nil, errors.Wrap(err, "error parsing program reaction")
 		}
-		reactions = append(reactions, reaction)
+		for _, r := range reaction {
+			reactions = append(reactions, r)
+		}
 	}
 
-	return &ast.Program{Input: input, Reactions: reactions}, nil
+	return reactions, nil
 }
 
 func (parser *Parser) parseInput() ([]ast.IntTuple, error) {

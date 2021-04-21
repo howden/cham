@@ -1,7 +1,7 @@
 <digit> ::= '0' | '1' | '2' | ... | '7' | '8' | '9'
 <number> ::= <digit> {<digit>}
 
-<char> ::= 'a' | 'b' | 'c' | ... | 'x' | 'y' | 'z'
+<char> ::= 'a' | 'b' | 'c' | ... | 'x' | 'y' | 'z' | '_'
 <ident> ::= <char> {<char>}
 
 <openb> ::= '('
@@ -73,4 +73,11 @@
 <program-input> ::= <program-input-items>
 
 <reaction-chain> ::= '|'
-<program> ::= <program-input> <reaction-chain> <reaction> {<reaction-chain> <reaction>}
+
+<reaction-def-operator> ::= ':'
+<reaction-def-statement> ::= <ident> <reaction-def-operator> <reaction> {<reaction-chain> <reaction>}
+
+<reaction-pointer> ::= <reaction>
+<reaction-pointer> ::= <reaction-def-operator> <ident>
+
+<program> ::= <program-input> <reaction-chain> <reaction-pointer> {<reaction-chain> <reaction-pointer>}
