@@ -23,6 +23,7 @@ A full (uncommented) version of the grammar is also available.
     * [Reaction](#reaction)
 * [Programs](#programs)
     * [Program Input](#program-input)
+    * [Reaction Definitions](#reaction-definitions)
     * [Program](#program)
 
 
@@ -271,7 +272,7 @@ The input into a program is a comma separated list of one or more numbers/number
 > {[0, 1], [0, 2], [0, 3]}
 > ```
 
-### Reaction definitions
+### Reaction Definitions
 ```ebnf
 <reaction-chain> ::= '|'
 
