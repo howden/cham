@@ -31,8 +31,13 @@ func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
 		if err != nil {
 			return err
 		}
-	} else {
-		err := executeParallelReactionOther(prog, multiset)
+	} else if analysis.DetermineReactionType(prog) == analysis.Shrinking {
+		err := executeParallelReactionShrinking(prog, multiset)
+		if err != nil {
+			return err
+		}
+	} else { // Constant
+		err := executeParallelReactionConstant(prog, multiset)
 		if err != nil {
 			return err
 		}
@@ -75,11 +80,40 @@ func executeParallelReactionExpanding(prog *ast.Reaction, multiset *Multiset) er
 	})
 }
 
-// Parallel evaluation implementation for constant or shrinking reactions (reactions that produce as many or less
-// outputs than inputs).
+// Parallel evaluation implementation for shrinking reactions (reactions that produce fewer outputs than inputs).
+// The general approach is to split the input multiset into partitions of size=8, then perform reactions on each
+// partition separately in parallel, increasing the partition size after each iteration by increments of 8, and
+// eventually merging the multisets back together at the end.
+func executeParallelReactionShrinking(prog *ast.Reaction, multiset *Multiset) error {
+	partitionSize := 8
+
+	for partitionSize*2 < multiset.Cardinality() {
+		before := multiset.Cardinality()
+
+		err := executeParallelReaction(multiset, partitionSize, func(partition *Multiset) error {
+			return performReactions(prog, partition, -1)
+		})
+		if err != nil {
+			return err
+		}
+
+		// If the multiset was unchanged by the reaction, skip further steps and return
+		// This condition will be met by reactions that shrink unconditionally
+		if before == multiset.Cardinality() {
+			return nil
+		}
+
+		partitionSize += 8
+	}
+
+	return nil
+}
+
+// Parallel evaluation implementation for constant reactions (reactions that produce the same amount of outputs as they
+// have inputs).
 // The general approach is to split the input multiset into partitions of size=32, then perform reactions on each
 // partition separately in parallel, then merge the multisets back together at the end.
-func executeParallelReactionOther(prog *ast.Reaction, multiset *Multiset) error {
+func executeParallelReactionConstant(prog *ast.Reaction, multiset *Multiset) error {
 	return executeParallelReaction(multiset, 32 /* partition size */, func(partition *Multiset) error {
 		return performReactions(prog, partition, -1)
 	})
