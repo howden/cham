@@ -1,7 +1,6 @@
 package eval
 
 import (
-	"fmt"
 	"github.com/howden/cham/analysis"
 	"github.com/howden/cham/ast"
 	"github.com/pkg/errors"
@@ -14,70 +13,91 @@ func Evaluate(prog *ast.Program) (*Multiset, error) {
 	multiset := NewMultiset()
 	multiset.AddAll(prog.Input)
 
-	for i, reaction := range prog.Reactions {
-		fmt.Printf("reaction %v start\n", i)
+	for _, reaction := range prog.Reactions {
 		err := evaluateReaction(reaction, multiset)
 		if err != nil {
 			return nil, errors.Wrap(err, "error evaluating reaction")
 		}
-		fmt.Printf("reaction %v end\n", i)
 	}
 
 	return multiset, nil
 }
 
+// Function to evaluate a reaction.
 func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
+	// Complete reactions in parallel
 	if analysis.DetermineReactionType(prog) == analysis.Expanding {
-		// If the reaction is an expanding reaction, try to evaluate using the special case
-		err := evaluateExpandingReaction(prog, multiset)
+		err := executeParallelReactionExpanding(prog, multiset)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := executeParallelReactionOther(prog, multiset)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Perform a final overall reaction pass on the whole multiset.
+	// This is strictly necessary for "constant" and "shrinking" reactions as the parallel execution
+	// will have only partially reacted the solution.
+	// For "expanding" reactions, this final pass is less likely to be necessary, but in certain edge cases,
+	// there is a possibility for left-over molecules that can still react. For example if the reaction has conditions
+	// depending on the relations between more than one input, some reactions may have been blocked due to partitioning.
+	return performReactions(prog, multiset, -1)
+}
+
+// Parallel evaluation implementation for expanding reactions (reactions that produce more outputs than inputs).
+// The general approach is to split the input multiset into partitions of size=1, then perform a single reaction on each
+// partition separately in parallel, then repeat this (still in parallel) if the solution changed, and eventually
+// merge the multisets back together at the end.
+func executeParallelReactionExpanding(prog *ast.Reaction, multiset *Multiset) error {
+	return executeParallelReaction(multiset, 1 /* partition size */, func(partition *Multiset) error {
+		// First, record the starting cardinality of the partition
+		before := partition.Cardinality()
+
+		// Then, attempt to perform a single reaction 'step' on the solution
+		err := performReactions(prog, partition, 1)
 		if err != nil {
 			return err
 		}
 
-		// Perform a final "normal" overall pass
-		// It is possible, for example if the expansion takes more than one input & has a condition depending on
-		// their relation that some reactions may be possible but not attempted due to partitioning, so best to be safe.
-		return performReactions(prog, multiset, -1)
-	} else {
-		return performReactions(prog, multiset, -1)
-	}
+		// If the multiset expanded as a result of the reaction, recursively call 'executeParallelReactionExpanding'
+		// to partition again and repeat this process
+		if partition.Cardinality() > before {
+			err = executeParallelReactionExpanding(prog, partition)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
-// Special evaluation implementation for expanding reactions (reactions that produce more outputs than inputs)
-// General approach is to split the input multiset into partitions of some size n, then perform reactions on each
-// partition separately in parallel (recursively!), then merge the multisets back together.
-func evaluateExpandingReaction(prog *ast.Reaction, multiset *Multiset) error {
-	// Partition the input multiset into partitions of size = 1
-	// (each module gets its own solution)
-	partitions := multiset.Partition(1)
+// Parallel evaluation implementation for constant or shrinking reactions (reactions that produce as many or less
+// outputs than inputs).
+// The general approach is to split the input multiset into partitions of size=32, then perform reactions on each
+// partition separately in parallel, then merge the multisets back together at the end.
+func executeParallelReactionOther(prog *ast.Reaction, multiset *Multiset) error {
+	return executeParallelReaction(multiset, 32 /* partition size */, func(partition *Multiset) error {
+		return performReactions(prog, partition, -1)
+	})
+}
 
-	// Create a channel to receive status callbacks from subtasks
+// Generic parallel evaluation function.
+// f is the function that is called to perform reactions on partitions.
+func executeParallelReaction(multiset *Multiset, partitionSize int, f func(partition *Multiset) error) error {
+	// Split the input multiset into partitions of the specified size
+	partitions := multiset.Partition(partitionSize)
+
+	// Create a channel to receive status callbacks from child goroutines
 	c := make(chan error)
 
-	// Iterate through each partition and schedule a goroutine to...
+	// Iterate through each partition and schedule a goroutine to perform a parallel reaction
 	for _, partition := range partitions {
 		go func(partition *Multiset) {
-			// First, record the starting cardinality of the partition
-			before := partition.Cardinality()
-
-			// Then, attempt to perform a single reaction 'step' on the solution
-			err := performReactions(prog, partition, 1)
-			if err != nil {
-				c <- err
-				return
-			}
-
-			// If the multiset expanded as a result of the reaction, recursively call 'evaluateExpandingReaction'
-			// to partition again and repeat this process
-			if partition.Cardinality() > before {
-				err = evaluateExpandingReaction(prog, partition)
-				if err != nil {
-					c <- err
-					return
-				}
-			}
-
-			c <- nil
+			c <- f(partition)
 		}(partition)
 	}
 

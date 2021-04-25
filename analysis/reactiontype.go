@@ -7,7 +7,7 @@ type ReactionType int
 
 const (
 	// Represents a reaction that reduces/shrinks the size of the solution
-	Reducing ReactionType = iota
+	Shrinking ReactionType = iota
 	// Represents a reaction that keeps the size of the solution constant
 	Constant
 	// Represents a reaction that expands the size of the solution
@@ -20,7 +20,7 @@ func DetermineReactionType(reaction *ast.Reaction) ReactionType {
 	outputs := len(reaction.Action.Products)
 
 	if inputs > outputs {
-		return Reducing
+		return Shrinking
 	} else if outputs > inputs {
 		return Expanding
 	} else {
