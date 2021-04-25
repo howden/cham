@@ -1,6 +1,8 @@
 package eval
 
 import (
+	"fmt"
+	"github.com/howden/cham/analysis"
 	"github.com/howden/cham/ast"
 	"github.com/pkg/errors"
 	"gonum.org/v1/gonum/stat/combin"
@@ -12,37 +14,122 @@ func Evaluate(prog *ast.Program) (*Multiset, error) {
 	multiset := NewMultiset()
 	multiset.AddAll(prog.Input)
 
-	for _, reaction := range prog.Reactions {
+	for i, reaction := range prog.Reactions {
+		fmt.Printf("reaction %v start\n", i)
 		err := evaluateReaction(reaction, multiset)
 		if err != nil {
 			return nil, errors.Wrap(err, "error evaluating reaction")
 		}
+		fmt.Printf("reaction %v end\n", i)
 	}
 
 	return multiset, nil
 }
 
-// Function to evaluate a reaction.
 func evaluateReaction(prog *ast.Reaction, multiset *Multiset) error {
+	if analysis.DetermineReactionType(prog) == analysis.Expanding {
+		// If the reaction is an expanding reaction, try to evaluate using the special case
+		err := evaluateExpandingReaction(prog, multiset)
+		if err != nil {
+			return err
+		}
+
+		// Perform a final "normal" overall pass
+		// It is possible, for example if the expansion takes more than one input & has a condition depending on
+		// their relation that some reactions may be possible but not attempted due to partitioning, so best to be safe.
+		return performReactions(prog, multiset, -1)
+	} else {
+		return performReactions(prog, multiset, -1)
+	}
+}
+
+// Special evaluation implementation for expanding reactions (reactions that produce more outputs than inputs)
+// General approach is to split the input multiset into partitions of some size n, then perform reactions on each
+// partition separately in parallel (recursively!), then merge the multisets back together.
+func evaluateExpandingReaction(prog *ast.Reaction, multiset *Multiset) error {
+	// Partition the input multiset into partitions of size = 1
+	// (each module gets its own solution)
+	partitions := multiset.Partition(1)
+
+	// Create a channel to receive status callbacks from subtasks
+	c := make(chan error)
+
+	// Iterate through each partition and schedule a goroutine to...
+	for _, partition := range partitions {
+		go func(partition *Multiset) {
+			// First, record the starting cardinality of the partition
+			before := partition.Cardinality()
+
+			// Then, attempt to perform a single reaction 'step' on the solution
+			err := performReactions(prog, partition, 1)
+			if err != nil {
+				c <- err
+				return
+			}
+
+			// If the multiset expanded as a result of the reaction, recursively call 'evaluateExpandingReaction'
+			// to partition again and repeat this process
+			if partition.Cardinality() > before {
+				err = evaluateExpandingReaction(prog, partition)
+				if err != nil {
+					c <- err
+					return
+				}
+			}
+
+			c <- nil
+		}(partition)
+	}
+
+	// Wait for all goroutines to complete
+	// If any of them produce an error, return it
+	n := len(partitions)
+	for i := 0; i < n; i++ {
+		err := <-c
+		if err != nil {
+			return err
+		}
+	}
+
+	// Merge step: clear the original input multiset, then re-add the results of each partition
+	multiset.Clear()
+	for _, partition := range partitions {
+		multiset.MergeFrom(partition)
+	}
+
+	return nil
+}
+
+// Performs reactions exhaustively (until no more can happen)
+func performReactions(prog *ast.Reaction, multiset *Multiset, limit int) error {
 
 	// Obtain a list of the identifiers used by the (single) reaction rule
 	// The length of this array becomes 'k' in the k-permutations calculation
 	k := len(prog.Input.Idents)
 
+	// Keep track of number of reactions performed
+	count := 0
+
 	// Continuously attempt reactions until either:
 	// - 'n < k' where n is the cardinality of the multiset and k is the number of identifiers
 	//     i.e. there's more variables in the reaction than there are values to fill them
 	// - a previous iteration of the loop was unable to complete a single reaction
-	solved := false
-	for !solved && multiset.Cardinality() >= k {
+	// - the number of reactions performed >= limit
+	for multiset.Cardinality() >= k {
 		didReactionOccur, err := attemptReaction(prog, k, multiset)
 		if err != nil {
 			return err
 		}
 
-		// If a reaction didn't take place during this iteration, then set solved=true
+		// If a reaction didn't occur (solution is "stable") then return
 		if !didReactionOccur {
-			solved = true
+			return nil
+		}
+
+		// Increment reaction counter & check if limit has been reached
+		count++
+		if limit > 0 && count >= limit {
+			return nil
 		}
 	}
 
