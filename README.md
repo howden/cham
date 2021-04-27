@@ -39,7 +39,11 @@ $ cham.exe
 
 The interpreter has two modes.
 
-You can either **execute a program directly** by passing the source code as an argument to the interpreter, or use the **REPL mode** by running the interpreter with no arguments.
+In **REPL mode**, the interpreter creates a prompt into which you can continuously run programs or execute commands. Defined programs will be *stored* in memory until the process exits.
+
+In **command-line mode**, you can perform one-off operations using the interpreter, such as evaluating a program (either from a command-line argument or read from a file) or viewing the raw output from the lexer or parser.
+
+To view usage information, run `./cham -h` (Mac/Linux) or `cham.exe -h` (Windows).
 
 #### Interpreter Design
 

@@ -5,6 +5,7 @@ import (
 	"github.com/howden/cham/eval"
 	"github.com/howden/cham/parser"
 	"github.com/manifoldco/promptui"
+	"strings"
 )
 
 // Runs the REPL (read eval print loop)
@@ -18,17 +19,38 @@ func StartRepl() {
 			return
 		}
 
-		if len(input) > 0 && input[0] == ':' {
-			command := input[1:]
+		isCommand, command, args := parseCommand(input)
+		if isCommand {
 			if command == "q" || command == "quit" {
+				// quit command
 				fmt.Println("Goodbye!")
 				return
+
+			} else if command == "l" || command == "load" {
+				// load command
+				if len(args) == 0 {
+					fmt.Println("You need to specify a filename!")
+					continue
+				}
+
+				path := args[0]
+				lines, err := readLines(path)
+				if err != nil {
+					fmt.Printf("error reading from file: %s\n", err)
+					return
+				}
+
+				HandleFileInput(lines, store)
+				fmt.Println("OK")
+
 			} else if command == "s" || command == "store" {
+				// store command
 				definitions := store.Slice()
 				fmt.Printf("Showing all stored reactions: (%v)\n", len(definitions))
 				for _, def := range definitions {
 					fmt.Printf("- :%v\n", def.Identifier.Name())
 				}
+
 			} else {
 				fmt.Printf("unknown command: %s\n", command)
 			}
@@ -39,13 +61,15 @@ func StartRepl() {
 }
 
 func validateInput(input string, store *eval.ReactionStore) error {
-	// command
-	if len(input) > 0 && input[0] == ':' {
-		command := input[1:]
-		if command == "q" || command == "quit" || command == "s" || command == "store" {
+	isCommand, command, _ := parseCommand(input)
+	if isCommand {
+		if command == "q" || command == "quit" ||
+			command == "s" || command == "store" ||
+			command == "l" || command == "load" {
 			return nil
+		} else {
+			return fmt.Errorf("unknown command: %s", command)
 		}
-		return fmt.Errorf("unknown command: %s", command)
 	}
 
 	// program
@@ -70,4 +94,24 @@ func getInput(store *eval.ReactionStore) (string, error) {
 		},
 	}
 	return prompt.Run()
+}
+
+// Attempts to parse a command from the given input
+// Returns (whether a command was parsed, the command name, any extra arguments)
+func parseCommand(input string) (bool, string, []string) {
+	if len(input) == 0 {
+		return false, "", nil
+	}
+
+	args := strings.Split(input, " ")
+	if len(args) == 0 {
+		return false, "", nil
+	}
+
+	command := args[0]
+	if len(command) < 2 || command[0] != ':' {
+		return false, "", nil
+	}
+
+	return true, command[1:], args[1:]
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/howden/cham/eval"
 	"github.com/howden/cham/lexer"
 	"github.com/howden/cham/parser"
+	"strings"
 )
 
 // Parses a program
@@ -18,6 +19,7 @@ func ParseProgramOrReaction(src string, store *eval.ReactionStore) (*ast.Program
 	return parser.NewParser(lexer.FromString(src)).ParseProgramOrReactionDefFully(store)
 }
 
+// Runs a program from the REPL and prints the result to STDOUT
 func HandleReplInput(src string, store *eval.ReactionStore) {
 	program, reactionDef, err := ParseProgramOrReaction(src, store)
 	if err != nil {
@@ -39,7 +41,7 @@ func HandleReplInput(src string, store *eval.ReactionStore) {
 }
 
 // Runs a program and prints the result to STDOUT
-func PrintEvalOutput(src string) {
+func HandleCmdLineInput(src string) {
 	program, err := ParseProgram(src)
 	if err != nil {
 		parser.PrintParserError(src, err)
@@ -53,6 +55,34 @@ func PrintEvalOutput(src string) {
 	}
 
 	fmt.Println(result)
+}
+
+// Runs a program loaded from a file and prints the result to STDOUT
+func HandleFileInput(lines []string, store *eval.ReactionStore) {
+	for _, src := range lines {
+		src = strings.Trim(src, " \n\t")
+		if len(src) == 0 {
+			continue
+		}
+
+		program, reactionDef, err := ParseProgramOrReaction(src, store)
+		if err != nil {
+			parser.PrintParserError(src, err)
+			return
+		}
+
+		if program != nil {
+			result, err := eval.Evaluate(program)
+			if err != nil {
+				fmt.Printf("error evaluating: %s\n", err)
+				return
+			} else {
+				fmt.Println(result)
+			}
+		} else if reactionDef != nil {
+			store.Put(reactionDef)
+		}
+	}
 }
 
 // Runs a program through the parser and prints the resultant AST
