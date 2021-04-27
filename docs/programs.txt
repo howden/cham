@@ -1,4 +1,3 @@
-# A collection of programs that can be executed using the REPL program.
 
 max : x,y => x if x>y
 
@@ -26,7 +25,4 @@ primes : x => [2,x]  |  :iota  |  :prime_sieve
 
 factorial : x => [1,x]  |  :iota  |  :product
 
-max_segment_sum: [i,x] => [i,x,x]  |
-  [i,x,s], [ip,xp,sp] => [i,x,s], [ip,xp,s+xp] if ip == i+1 && s+xp > sp  |
-  [i,x,s], [ip,xp,sp] => [ip,xp,sp] if sp > s  |
-  [i,x,s] => [s,i]
+max_segment_sum: [i,x] => [i,x,x]  |  [i,x,s], [ip,xp,sp] => [i,x,s], [ip,xp,s+xp] if ip == i+1 && s+xp > sp  |  [i,x,s], [ip,xp,sp] => [ip,xp,sp] if sp > s  |  [i,x,s] => [s,i]
