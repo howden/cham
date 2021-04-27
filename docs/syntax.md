@@ -4,7 +4,7 @@ This document outlines the context free grammar that describes the syntax of CHA
 
 The code blocks contain the grammar in Backus-Naur form. The surrounding text is simply provide further explaination and is not part of the language specification.
 
-A full (uncommented) version of the grammar is also available.
+A plain, undocumented version of the grammar can be found in the [syntax.ebnf](syntax.ebnf) file.
 
 #### Contents
 * [Basics](#basics)

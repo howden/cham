@@ -4,7 +4,7 @@ This document contains a number of programs written using the CHAM language.
 
 They can be tested / executed using the REPL program.
 
-Plain, uncommented versions of these programs are also available.
+Plain, undocumented versions of these programs can be found in [programs.txt](programs.txt).
 
 #### Contents
 * [`max`](#max)

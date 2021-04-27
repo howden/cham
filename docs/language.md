@@ -187,6 +187,6 @@ Tuples allow more interesting programs to be implemented - you can check out the
 
 The simple answer is: start playing!
 
-If you're interested in finding out more about the language syntax, more information can be found in [syntax.md](../syntax.md).
+If you're interested in finding out more about the language syntax, more information can be found in [syntax.md](syntax.md).
 
-If you want to take a look at some example programs, those can be found in [programs.md](../programs.md).
+If you want to take a look at some example programs, those can be found in [programs.md](programs.md).

@@ -17,7 +17,7 @@ The interpreter is written using the [Go](https://golang.org/) programming langu
 
 You can **compile from source** if you have the [Go toolchain](https://golang.org/doc/install) installed on your system. Just execute `go build` from the root project directory.
 
-Alternatively, you can **download pre-built binaries** for Windows, MacOS and Linux. These can be found on GitHub under the [Actions](https://github.com/howden/cham/actions) tab, followed by the build you want, then the desired binary from the *Artifacts* section.
+Alternatively, you can **download pre-built binaries** for Windows, MacOS and Linux. These can be found on GitHub under the [Actions](https://github.com/howden/cham/actions) tab. Just select the build you want, then download the desired binary from the *Artifacts* section.
 
 #### Using the interpreter on Mac or Linux
 
@@ -35,19 +35,14 @@ After compiling or downloading the binary, run the following in the Command Prom
 $ cham.exe
 ```
 
-
-
 #### Interpreter modes
 
 The interpreter has two modes.
 
-You can either **execute a program directly** by passing the source code as an argument to the interpreter, or enter the **REPL mode** by running the interpreter with no arguments.
-
-
+You can either **execute a program directly** by passing the source code as an argument to the interpreter, or use the **REPL mode** by running the interpreter with no arguments.
 
 #### Interpreter Design
 
 The interpreter follows a fairly standard design. Program source code passes through a lexer and parser, and is then evaluated.
 
-The evaulator is capable of executing "reaction" programs in parallel.
-
+The evaluator is capable of executing "reaction" programs in parallel.
