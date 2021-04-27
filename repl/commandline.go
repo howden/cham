@@ -66,7 +66,7 @@ func PrintHelp() {
 
   REPL COMMANDS
     :quit   :q    quit the REPL
-	:load   :l    loads programs from the given file (provided as an argument)
+    :load   :l    loads programs from the given file (provided as an argument)
     :store  :s    view a list of reactions saved in the REPLs memory
 
 `)
