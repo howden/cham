@@ -1,4 +1,4 @@
-# CHAM v1.0 - Language Guide
+# Language Guide
 
 This document contains a brief introductory guide explaining how the language works.
 

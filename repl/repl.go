@@ -37,7 +37,7 @@ func StartRepl() {
 				lines, err := readLines(path)
 				if err != nil {
 					fmt.Printf("error reading from file: %s\n", err)
-					return
+					continue
 				}
 
 				HandleFileInput(lines, store)

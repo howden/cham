@@ -1,6 +1,6 @@
-# CHAM v1.0 - Syntax Specification
+# Syntax Specification
 
-This document outlines the context free grammar that describes the syntax of CHAM programs.
+This document outlines the context free grammar that describes the syntax of programs.
 
 The code blocks contain the grammar in Backus-Naur form. The surrounding text is simply provide further explaination and is not part of the language specification.
 

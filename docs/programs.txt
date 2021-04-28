@@ -26,3 +26,9 @@ primes : x => [2,x]  |  :iota  |  :prime_sieve
 factorial : x => [1,x]  |  :iota  |  :product
 
 max_segment_sum: [i,x] => [i,x,x]  |  [i,x,s], [ip,xp,sp] => [i,x,s], [ip,xp,s+xp] if ip == i+1 && s+xp > sp  |  [i,x,s], [ip,xp,sp] => [ip,xp,sp] if sp > s  |  [i,x,s] => [s,i]
+
+prime_factorization_coeff: [n, p, k] => [n, p/n, k+1] if p % n == 0  |  [n, p, k] => [n, k]  |  [n, k] => {} if k == 0
+
+prime_factorization_reduce: [n, k] => { [n, k-1], [n, 1] } if k > 1  |  [n, k] => n
+
+prime_factorization:  :prime_factorization_coeff | :prime_factorization_reduce

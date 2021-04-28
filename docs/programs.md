@@ -1,10 +1,10 @@
-# CHAM 1.0 - Example Programs
+# Example Programs
 
-This document contains a number of programs written using the CHAM language.
+This document contains a number of programs written using the language.
 
 They can be tested / executed using the REPL program.
 
-Plain, undocumented versions of these programs can be found in [programs.txt](programs.txt).
+Plain, undocumented versions of these programs can be found in [programs.txt](programs.txt). You can load all of these directly into the REPL using the command `:load docs/programs.txt`.
 
 #### Contents
 * [`max`](#max)
@@ -21,6 +21,7 @@ Plain, undocumented versions of these programs can be found in [programs.txt](pr
 * [`primes`](#primes)
 * [`factorial`](#factorial)
 * [`max_segment_sum`](#max_segment_sum)
+* [`prime_factorization`](#prime_factorization)
 
 ___
 
@@ -231,3 +232,30 @@ max_segment_sum: [i,x] => [i,x,x]  |
 > ```
 > 
 > The contiguous subsequence with the largest sum is `4, -1, 2, 1` which has sum `6`, and ends at index `7`.
+
+### `prime_factorization`
+Given an input `n`, decompose n into its prime factors.
+
+See https://en.wikipedia.org/wiki/Prime_number#Unique_factorization for more information.
+
+```
+prime_factorization_coeff: [n, p, k] => [n, p/n, k+1] if p % n == 0  |
+  [n, p, k] => [n, k]  |
+  [n, k] => {} if k == 0
+
+prime_factorization_reduce: [n, k] => { [n, k-1], [n, 1] } if k > 1  |  [n, k] => n
+
+prime_factorization:  :prime_factorization_coeff | :prime_factorization_reduce
+```
+
+> **Example**
+>
+> Using the number `1925` as an example:
+>
+> ```
+> > {1925} | :primes | n => [n, 1925, 0] | :prime_factorization
+> [11 7 5 5]
+> ```
+>
+> `1925 = 7 * 11 * 5^2`
+
