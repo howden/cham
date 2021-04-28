@@ -6,6 +6,8 @@ They can be tested / executed using the REPL program.
 
 Plain, undocumented versions of these programs can be found in [programs.txt](programs.txt). You can load all of these directly into the REPL using the command `:load docs/programs.txt`.
 
+[References](#references) are provided for programs which were derived from other sources.
+
 #### Contents
 * [`max`](#max)
 * [`min`](#min)
@@ -124,7 +126,7 @@ See https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes for more information.
 ```
 prime_sieve: x,y => y if x%y == 0
 ```
-
+[[1]](#references)
 > **Example**
 >
 > ```
@@ -139,7 +141,7 @@ See https://en.wikipedia.org/wiki/Fibonacci_number for more information.
 ```
 fib: x => { x-1, x-2 } if x>1  |  x,y => x+y
 ```
-
+[[2]](#references)
 > **Example**
 >
 > ```
@@ -151,10 +153,15 @@ fib: x => { x-1, x-2 } if x>1  |  x,y => x+y
 Given a multiset M of elements, returns a multiset of tuples `[i, m]` where `i` is the sorted position of element `m` in the imaginary ordering of M.
 ```
 sort_init: x => [0,x]
-sort_indexed: [i,x], [j,y] => { [i+1,x], [j,y] } if i==j && x>=y
-sort: :sort_init | :sort_indexed
+sort_promote: [i,x], [j,y] => { [i+1,x], [j,y] } if i==j && x>=y
+sort: :sort_init | :sort_promote
 ```
 
+It is also possible to sort an existing multiset of tuples.
+```
+sort_existing: [i,x], [j,y] => { [i,y], [j,x] } if i<j and x>y
+```
+[[3]](#references)
 > **Example**
 >
 > ```
@@ -170,7 +177,7 @@ Given a multiset {`[x,y]`}, returns a multiset of consecutive numbers in the ran
 ```
 iota: [x,y] => { [x, (x+y)/2], [(x+y)/2+1, y] } if x != y  |  [x,y] => x if x==y
 ```
-
+[[2]](#references)
 > **Example**
 >
 > ```
@@ -188,7 +195,7 @@ See https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes for more information.
 ```
 primes: x => [2,x]  |  :iota  |  :prime_sieve
 ```
-
+[[2]](#references)
 > **Example**
 >
 > ```
@@ -203,7 +210,7 @@ See https://en.wikipedia.org/wiki/Factorial for more information.
 ```
 factorial: x => [1,x]  |  :iota  |  :product
 ```
-
+[[3]](#references)
 > **Example**
 >
 > ```
@@ -221,7 +228,7 @@ max_segment_sum: [i,x] => [i,x,x]  |
   [i,x,s], [ip,xp,sp] => [ip,xp,sp] if sp > s  |
   [i,x,s] => [s,i]
 ```
-
+[[2]](#references)
 > **Example**
 > 
 > Using sequence `-10, -2, 1, -3, 4, -1, 2, 1, -5, 4` as an example:
@@ -247,7 +254,7 @@ prime_factorization_reduce: [n, k] => { [n, k-1], [n, 1] } if k > 1  |  [n, k] =
 
 prime_factorization:  :prime_factorization_coeff | :prime_factorization_reduce
 ```
-
+[[3]](#references)
 > **Example**
 >
 > Using the number `1925` as an example:
@@ -259,3 +266,12 @@ prime_factorization:  :prime_factorization_coeff | :prime_factorization_reduce
 >
 > `1925 = 7 * 11 * 5^2`
 
+___
+
+### References
+
+> [1] J.-P. Banâtre, P. Fradet, and Y. Radenac, ‘Principles of Chemical Programming’, Electronic Notes in Theoretical Computer Science, vol. 124, no. 1, Art. no. 1, Mar. 2005, doi: 10.1016/j.entcs.2004.07.019.
+
+> [2] J.-P. Banâtre, P. Fradet, and D. Le Métayer, ‘Gamma and the chemical reaction model: fifteen years after’, p. 27, Aug. 2000, doi: 10.1142/9781848161023_0001.
+
+> [3] J.-P. Banâtre and D. Le Métayer, ‘Programming by multiset transformation’, Commun. ACM, vol. 36, no. 1, Art. no. 1, Apr. 1990, doi: 10.1145/151233.151242.

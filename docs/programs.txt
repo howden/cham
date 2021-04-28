@@ -1,29 +1,30 @@
+max: x,y => x if x>y
 
-max : x,y => x if x>y
+min: x,y => x if x<y
 
-min : x,y => x if x<y
+remove_duplicates: x,y => x if x==y
 
-remove_duplicates : x,y => x if x==y
+sum: x,y => x+y
 
-sum : x,y => x+y
+product: x,y => x*y
 
-product : x,y => x*y
+filter_odd: x => {} if x%2 == 0
 
-filter_odd : x => {} if x%2 == 0
+filter_even: x => {} if x%2 == 1
 
-filter_even : x => {} if x%2 == 1
+prime_sieve: x,y => y if x%y == 0
 
-prime_sieve : x,y => y if x%y == 0
+fib: x => { x-1, x-2 } if x>1  |  x,y => x+y
 
-fib : x => { x-1, x-2 } if x>1  |  x,y => x+y
+sort: x => [0,x]  |  [i,x], [j,y] => { [i+1,x], [j,y] } if i==j && x>=y
 
-sort : x => [0,x]  |  [i,x], [j,y] => { [i+1,x], [j,y] } if i==j && x>=y
+sort_existing: [i,x], [j,y] => { [i,y], [j,x] } if i<j && x>y
 
-iota : [x,y] => { [x, (x+y)/2], [(x+y)/2+1, y] } if x != y  |  [x,y] => x if x==y
+iota: [x,y] => { [x, (x+y)/2], [(x+y)/2+1, y] } if x != y  |  [x,y] => x if x==y
 
-primes : x => [2,x]  |  :iota  |  :prime_sieve
+primes: x => [2,x]  |  :iota  |  :prime_sieve
 
-factorial : x => [1,x]  |  :iota  |  :product
+factorial: x => [1,x]  |  :iota  |  :product
 
 max_segment_sum: [i,x] => [i,x,x]  |  [i,x,s], [ip,xp,sp] => [i,x,s], [ip,xp,s+xp] if ip == i+1 && s+xp > sp  |  [i,x,s], [ip,xp,sp] => [ip,xp,sp] if sp > s  |  [i,x,s] => [s,i]
 
