@@ -40,6 +40,8 @@ max: x,y => x if x>y
 > [7]
 > ```
 
+___
+
 ### `min`
 Filters the multiset so that only the smallest remains.
 ```
@@ -52,6 +54,8 @@ min: x,y => x if x<y
 > > {1,2,4,7,3} | :max
 > [1]
 > ```
+
+___
 
 ### `remove_duplicates`
 Filters the multiset so that duplicates are removed.
@@ -66,6 +70,8 @@ remove_duplicates: x,y => x if x==y
 > [1 7 2]
 > ```
 
+___
+
 ### `sum`
 Reduces the multiset to the sum of all elements.
 ```
@@ -78,6 +84,8 @@ sum: x,y => x+y
 > > {1,7,2,4,7,3} | :sum
 > [24]
 > ```
+
+___
 
 ### `product`
 Reduces the multiset to the product of all elements.
@@ -92,6 +100,8 @@ product: x,y => x*y
 > [1176]
 > ```
 
+___
+
 ### `filter_odd`
 Filters the multiset so that only odd elements remain.
 ```
@@ -105,6 +115,8 @@ filter_odd: x => {} if x%2 == 0
 > [3 1 7 7]
 > ```
 
+___
+
 ### `filter_even`
 Filters the multiset so that only even elements remain.
 ```
@@ -117,6 +129,8 @@ filter_even: x => {} if x%2 == 1
 > > {1,7,2,4,7,3} | :filter_even
 > [2 4]
 > ```
+
+___
 
 ### `prime_sieve`
 Given a multiset {`2..n`}, filters so only the prime numbers remain.  
@@ -134,6 +148,8 @@ prime_sieve: x,y => y if x%y == 0
 > [2 17 3 13 5 19 7 11]
 > ```
 
+___
+
 ### `fib`
 Given a multiset {`n`}, returns the nth fibonacci number.
 
@@ -148,6 +164,8 @@ fib: x => { x-1, x-2 } if x>1  |  x,y => x+y
 > > {14} | :fib
 > [377]
 > ```
+
+___
 
 ### `sort`
 Given a multiset M of elements, returns a multiset of tuples `[i, m]` where `i` is the sorted position of element `m` in the imaginary ordering of M.
@@ -172,6 +190,8 @@ sort_existing: [i,x], [j,y] => { [i,y], [j,x] } if i<j and x>y
 > 
 > > [[0 **1**] [1 **2**] [2 **3**] [3 **7**] [4 **8**] [5 **9**]]
 
+___
+
 ### `iota`
 Given a multiset {`[x,y]`}, returns a multiset of consecutive numbers in the range `x..y`.
 ```
@@ -186,6 +206,8 @@ iota: [x,y] => { [x, (x+y)/2], [(x+y)/2+1, y] } if x != y  |  [x,y] => x if x==y
 > ```
 > 
 > Remember: multisets do not have any defined order, so the output may vary.
+
+___
 
 ### `primes`
 Given a multiset {`n`}, returns a multiset of all prime numbers up to `n`.  
@@ -203,6 +225,8 @@ primes: x => [2,x]  |  :iota  |  :prime_sieve
 > [5 23 13 2 17 7 19 29 3 11]
 > ```
 
+___
+
 ### `factorial`
 Given a multiset {`n`}, returns a multiset containing `n!`.
 
@@ -217,6 +241,8 @@ factorial: x => [1,x]  |  :iota  |  :product
 > > {9} | :factorial
 > [362880]
 > ```
+
+___
 
 ### `max_segment_sum`
 Given an input sequence `a..b` of numbers in the format `[i,a]..[j,b]` where `i..j` corresponds to the position/index of elements `a..b` in the sequence, returns a tuple `[s,i]` where `s` is the sum and `i` is the end index of the largest segment sum.
@@ -239,6 +265,8 @@ max_segment_sum: [i,x] => [i,x,x]  |
 > ```
 > 
 > The contiguous subsequence with the largest sum is `4, -1, 2, 1` which has sum `6`, and ends at index `7`.
+
+___
 
 ### `prime_factorization`
 Given an input `n`, decompose n into its prime factors.
